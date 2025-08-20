@@ -13,16 +13,21 @@
   "scope": "/",
   "icons": [
     {
-      "src": "https://cdn.abacus.ai/images/60c2a3c9-2bba-4f98-aedf-4307b8765618.png",
+      "src": "/logo-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "https://cdn.abacus.ai/images/28e9fcaf-c2ac-4e96-8938-7b1e420454b1.png",
+      "src": "/logo-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
     }
   ],
   "screenshots": [],
