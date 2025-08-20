@@ -15,23 +15,13 @@ import { Header } from '@/components/layout/header';
 import { User, Dog, Camera, Save, ArrowLeft } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
+import { DOG_BREEDS, isSpanishBreed } from '@/lib/dog-breeds';
 
 interface ProfileSetupClientProps {
   user: any;
 }
 
-const dogBreeds = [
-  'Golden Retriever',
-  'Pastor Alemán',
-  'Labrador',
-  'Border Collie',
-  'Beagle',
-  'Bulldog Francés',
-  'Husky Siberiano',
-  'Cocker Spaniel',
-  'Mestizo',
-  'Otro'
-];
+// Usar la lista centralizada de razas de perro
 
 const dogImages = [
   'https://www.naomijenkinart.com/images/naomi-uploads/gallery-riley-wm.jpg',
@@ -235,9 +225,9 @@ export function ProfileSetupClient({ user }: ProfileSetupClientProps) {
                         <SelectValue placeholder="Selecciona la raza" />
                       </SelectTrigger>
                       <SelectContent>
-                        {dogBreeds.map((breed) => (
+                        {DOG_BREEDS.map((breed) => (
                           <SelectItem key={breed} value={breed.toLowerCase()}>
-                            {breed}
+                            {breed} {isSpanishBreed(breed) ? '🇪🇸' : ''}
                           </SelectItem>
                         ))}
                       </SelectContent>
