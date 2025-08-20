@@ -3,7 +3,7 @@
   "buildCommand": "prisma generate && next build",
   "outputDirectory": ".next",
   "devCommand": "next dev",
-  "installCommand": "yarn install",
+  "installCommand": "npm install",
   "framework": "nextjs",
   "functions": {
     "app/api/**/*.ts": {
@@ -15,10 +15,5 @@
       "source": "/api/(.*)",
       "destination": "/api/$1"
     }
-  ],
-  "env": [
-    "DATABASE_URL",
-    "NEXTAUTH_URL",
-    "NEXTAUTH_SECRET"
   ]
 }
