@@ -6,6 +6,9 @@ import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import { prisma } from '@/lib/db';
 
+// Marcar como ruta dinámica para evitar errores de SSG
+export const dynamic = 'force-dynamic';
+
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
