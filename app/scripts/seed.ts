@@ -165,7 +165,7 @@ async function main() {
       id: 'explorador-novato',
       name: 'Explorador Novato',
       description: 'Tu primera aventura en el Camino Guau',
-      image: 'https://cdn.abacus.ai/images/5a0d19ad-e7b0-4e55-a8ef-0f95501c2550.png',
+      image: '/images/stamp-6.png',
       eventId: 'event_1',
       categoryId: 'adventure',
       rarity: 'common'
@@ -174,7 +174,7 @@ async function main() {
       id: 'caminante-experto',
       name: 'Caminante Experto',
       description: 'Dominas el arte del senderismo canino',
-      image: 'https://cdn.abacus.ai/images/d29529ed-3526-4f0f-9a3b-af23d502d700.png',
+      image: '/images/achievement-1.png',
       eventId: 'event_2',
       categoryId: 'adventure',
       rarity: 'rare'
@@ -183,7 +183,7 @@ async function main() {
       id: 'montanero-guau',
       name: 'Montañero Guau',
       description: 'Has conquistado las montañas',
-      image: 'https://cdn.abacus.ai/images/0ad35ce0-f589-4e19-b4ae-f315f4cb0f7f.png',
+      image: '/images/stamp-1.png',
       eventId: 'event_4',
       categoryId: 'adventure',
       rarity: 'epic'
@@ -192,7 +192,7 @@ async function main() {
       id: 'explorador-legendario',
       name: 'Explorador Legendario',
       description: 'Un verdadero pionero de aventuras',
-      image: 'https://cdn.abacus.ai/images/da48ac52-904d-461e-9572-0c125ff4ff0c.png',
+      image: '/images/achievement-3.png',
       eventId: 'event_2',
       categoryId: 'adventure',
       rarity: 'legendary'
@@ -201,7 +201,7 @@ async function main() {
       id: 'aventurero-supremo',
       name: 'Aventurero Supremo',
       description: 'El máximo nivel de aventurero',
-      image: 'https://cdn.abacus.ai/images/5e36603d-e9db-4244-ba79-158cbab68b15.png',
+      image: '/images/stamp-7.png',
       eventId: 'event_4',
       categoryId: 'adventure',
       rarity: 'legendary'
@@ -211,7 +211,7 @@ async function main() {
       id: 'primeros-pasos',
       name: 'Primeros Pasos',
       description: 'Cada gran viaje comienza con un paso',
-      image: 'https://cdn.abacus.ai/images/f9d29a02-d3e3-4884-b676-08437041087d.png',
+      image: '/images/achievement-5.png',
       eventId: 'event_1',
       categoryId: 'kilometers',
       rarity: 'common'
@@ -220,7 +220,7 @@ async function main() {
       id: 'maratonista-canino',
       name: 'Maratonista Canino',
       description: 'La resistencia de un verdadero atleta',
-      image: 'https://cdn.abacus.ai/images/61f7f756-bb72-48c3-831d-9cd8dfe2512b.png',
+      image: '/images/stamp-9.png',
       eventId: 'event_2',
       categoryId: 'kilometers',
       rarity: 'rare'
@@ -229,7 +229,7 @@ async function main() {
       id: 'ultra-runner',
       name: 'Ultra Runner',
       description: 'Superaste todos los límites',
-      image: 'https://cdn.abacus.ai/images/36ea9e81-2fed-4eba-a7a5-713b4af66b24.png',
+      image: '/images/stamp-5.png',
       eventId: 'event_4',
       categoryId: 'kilometers',
       rarity: 'epic'
@@ -238,7 +238,7 @@ async function main() {
       id: 'corredor-infinito',
       name: 'Corredor Infinito',
       description: 'Tu resistencia no tiene límites',
-      image: 'https://cdn.abacus.ai/images/d6552898-c1f0-414c-99e2-d392ddef859a.png',
+      image: '/images/achievement-2.png',
       eventId: 'event_2',
       categoryId: 'kilometers',
       rarity: 'legendary'
@@ -248,7 +248,7 @@ async function main() {
       id: 'amigo-del-bosque',
       name: 'Amigo del Bosque',
       description: 'En armonía con la naturaleza',
-      image: 'https://cdn.abacus.ai/images/931c5e65-3d06-40d8-bc7f-da5e6c335145.png',
+      image: '/images/stamp-13.png',
       eventId: 'event_1',
       categoryId: 'nature',
       rarity: 'common'
@@ -257,7 +257,7 @@ async function main() {
       id: 'guardian-del-rio',
       name: 'Guardián del Río',
       description: 'Protector de las aguas cristalinas',
-      image: 'https://cdn.abacus.ai/images/35a538ef-9149-4f7f-943f-5cb10797e300.png',
+      image: '/images/stamp-4.png',
       eventId: 'event_5',
       categoryId: 'nature',
       rarity: 'rare'
@@ -266,7 +266,7 @@ async function main() {
       id: 'protector-montana',
       name: 'Protector de la Montaña',
       description: 'Guardián de las altas cumbres',
-      image: 'https://cdn.abacus.ai/images/ada042f1-5a99-4dbe-97ab-80ed43a96da6.png',
+      image: '/images/stamp-15.png',
       eventId: 'event_4',
       categoryId: 'nature',
       rarity: 'epic'
@@ -275,7 +275,7 @@ async function main() {
       id: 'espiritu-naturaleza',
       name: 'Espíritu de la Naturaleza',
       description: 'Uno con todos los elementos naturales',
-      image: 'https://cdn.abacus.ai/images/88caab0c-d979-42f1-af12-d0c609f40733.png',
+      image: '/images/stamp-12.png',
       eventId: 'event_4',
       categoryId: 'nature',
       rarity: 'legendary'
@@ -285,7 +285,7 @@ async function main() {
       id: 'aventura-primaveral',
       name: 'Aventura Primaveral',
       description: 'Floreciendo con la nueva temporada',
-      image: 'https://cdn.abacus.ai/images/f3a7b3d8-f951-461c-aa20-a51fcb41a18e.png',
+      image: '/images/achievement-4.png',
       eventId: 'event_1',
       categoryId: 'seasons',
       rarity: 'common'
@@ -294,7 +294,7 @@ async function main() {
       id: 'explorador-verano',
       name: 'Explorador de Verano',
       description: 'Disfrutando del calor estival',
-      image: 'https://cdn.abacus.ai/images/2e18f8fd-17c0-4014-bf58-9a4a684c87ba.png',
+      image: '/images/stamp-3.png',
       eventId: 'event_5',
       categoryId: 'seasons',
       rarity: 'rare'
@@ -304,7 +304,7 @@ async function main() {
       id: 'medalla-150km',
       name: 'Medalla 150 km',
       description: 'Has superado los 150 kilómetros',
-      image: 'https://cdn.abacus.ai/images/36ea9e81-2fed-4eba-a7a5-713b4af66b24.png',
+      image: '/images/stamp-5.png',
       eventId: 'event_4',
       categoryId: 'kilometers',
       rarity: 'rare'
@@ -313,7 +313,7 @@ async function main() {
       id: 'conquistador-200km',
       name: 'Conquistador 200 km',
       description: 'Doscientos kilómetros de pura aventura',
-      image: 'https://cdn.abacus.ai/images/d6552898-c1f0-414c-99e2-d392ddef859a.png',
+      image: '/images/achievement-2.png',
       eventId: 'event_2',
       categoryId: 'kilometers',
       rarity: 'epic'
@@ -322,7 +322,7 @@ async function main() {
       id: 'titán-300km',
       name: 'Titán de 300 km',
       description: 'Un logro verdaderamente titánico',
-      image: 'https://cdn.abacus.ai/images/da48ac52-904d-461e-9572-0c125ff4ff0c.png',
+      image: '/images/achievement-3.png',
       eventId: 'event_4',
       categoryId: 'kilometers',
       rarity: 'epic'
@@ -331,7 +331,7 @@ async function main() {
       id: 'leyenda-500km',
       name: 'Leyenda 500 km',
       description: 'Quinientos kilómetros de leyenda pura',
-      image: 'https://cdn.abacus.ai/images/5e36603d-e9db-4244-ba79-158cbab68b15.png',
+      image: '/images/stamp-7.png',
       eventId: 'event_2',
       categoryId: 'kilometers',
       rarity: 'legendary'
@@ -340,7 +340,7 @@ async function main() {
       id: 'maestro-750km',
       name: 'Maestro 750 km',
       description: 'Solo los verdaderos maestros llegan aquí',
-      image: 'https://cdn.abacus.ai/images/88caab0c-d979-42f1-af12-d0c609f40733.png',
+      image: '/images/stamp-12.png',
       eventId: 'event_4',
       categoryId: 'kilometers',
       rarity: 'legendary'
@@ -349,7 +349,7 @@ async function main() {
       id: 'ascension-1000km',
       name: 'Ascensión 1000 km',
       description: '¡Mil kilómetros! Has alcanzado la ascensión',
-      image: 'https://cdn.abacus.ai/images/ada042f1-5a99-4dbe-97ab-80ed43a96da6.png',
+      image: '/images/stamp-15.png',
       eventId: 'event_2',
       categoryId: 'special',
       rarity: 'legendary'
@@ -370,7 +370,7 @@ async function main() {
       id: 'achievement_1',
       name: 'Primeros Pasos',
       description: 'Completa tu primer evento del Camino Guau',
-      icon: 'https://cdn.abacus.ai/images/62987810-4aed-47bb-9db8-d06fc167b839.png',
+      icon: '/images/welcome-medal.png',
       type: 'events',
       threshold: 1,
       order: 1
@@ -379,7 +379,7 @@ async function main() {
       id: 'achievement_2',
       name: 'Caminante Bronce',
       description: 'Recorre 25 kilómetros en total',
-      icon: 'https://cdn.abacus.ai/images/62987810-4aed-47bb-9db8-d06fc167b839.png',
+      icon: '/images/welcome-medal.png',
       type: 'kilometers',
       threshold: 25,
       order: 2
@@ -388,7 +388,7 @@ async function main() {
       id: 'achievement_3',
       name: 'Caminante Plata',
       description: 'Recorre 50 kilómetros en total',
-      icon: 'https://cdn.abacus.ai/images/6bbd07d5-48a1-4dd6-9d47-0da23b49315e.png',
+      icon: '/images/stamp-10.png',
       type: 'kilometers',
       threshold: 50,
       order: 3
@@ -397,7 +397,7 @@ async function main() {
       id: 'achievement_4',
       name: 'Caminante Oro',
       description: 'Completa la meta de 100 kilómetros del Camino Guau',
-      icon: 'https://cdn.abacus.ai/images/9caa4760-9639-4746-8909-2b6bfc1ddd1f.png',
+      icon: '/images/stamp-14.png',
       type: 'kilometers',
       threshold: 100,
       order: 4
@@ -406,7 +406,7 @@ async function main() {
       id: 'achievement_5',
       name: 'Coleccionista',
       description: 'Colecciona 5 sellos digitales',
-      icon: 'https://cdn.abacus.ai/images/78ab44ae-7e5f-4990-9d79-df0e36ed5086.png',
+      icon: '/images/stamp-11.png',
       type: 'stamps',
       threshold: 5,
       order: 5
@@ -415,7 +415,7 @@ async function main() {
       id: 'achievement_6',
       name: 'Peregrino Experto',
       description: 'Participa en 10 eventos del Camino Guau',
-      icon: 'https://cdn.abacus.ai/images/ff6c00cd-096d-4a50-9bdb-6831a32ff22c.png',
+      icon: '/images/achievement-6.png',
       type: 'events',
       threshold: 10,
       order: 6
@@ -424,7 +424,7 @@ async function main() {
       id: 'achievement_7',
       name: 'Explorador Avanzado',
       description: 'Alcanza los 150 kilómetros en tu viaje',
-      icon: 'https://cdn.abacus.ai/images/36ea9e81-2fed-4eba-a7a5-713b4af66b24.png',
+      icon: '/images/stamp-5.png',
       type: 'kilometers',
       threshold: 150,
       order: 7
@@ -433,7 +433,7 @@ async function main() {
       id: 'achievement_8',
       name: 'Conquistador de Rutas',
       description: 'Supera la barrera de los 200 kilómetros',
-      icon: 'https://cdn.abacus.ai/images/d6552898-c1f0-414c-99e2-d392ddef859a.png',
+      icon: '/images/achievement-2.png',
       type: 'kilometers',
       threshold: 200,
       order: 8
@@ -442,7 +442,7 @@ async function main() {
       id: 'achievement_9',
       name: 'Titán del Camino',
       description: 'Recorre 300 kilómetros de aventura pura',
-      icon: 'https://cdn.abacus.ai/images/da48ac52-904d-461e-9572-0c125ff4ff0c.png',
+      icon: '/images/achievement-3.png',
       type: 'kilometers',
       threshold: 300,
       order: 9
@@ -451,7 +451,7 @@ async function main() {
       id: 'achievement_10',
       name: 'Leyenda Viviente',
       description: '500 kilómetros te convierten en leyenda',
-      icon: 'https://cdn.abacus.ai/images/5e36603d-e9db-4244-ba79-158cbab68b15.png',
+      icon: '/images/stamp-7.png',
       type: 'kilometers',
       threshold: 500,
       order: 10
@@ -460,7 +460,7 @@ async function main() {
       id: 'achievement_11',
       name: 'Maestro del Universo',
       description: 'Has recorrido 750 kilómetros, eres un maestro',
-      icon: 'https://cdn.abacus.ai/images/88caab0c-d979-42f1-af12-d0c609f40733.png',
+      icon: '/images/stamp-12.png',
       type: 'kilometers',
       threshold: 750,
       order: 11
@@ -469,7 +469,7 @@ async function main() {
       id: 'achievement_12',
       name: 'Ascensión Divina',
       description: '¡1000 kilómetros! Has alcanzado la ascensión divina',
-      icon: 'https://cdn.abacus.ai/images/ada042f1-5a99-4dbe-97ab-80ed43a96da6.png',
+      icon: '/images/stamp-15.png',
       type: 'kilometers',
       threshold: 1000,
       order: 12

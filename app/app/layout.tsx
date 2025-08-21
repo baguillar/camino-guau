@@ -15,10 +15,10 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   icons: {
     icon: [
-      { url: 'https://cdn.abacus.ai/images/60c2a3c9-2bba-4f98-aedf-4307b8765618.png', sizes: '192x192', type: 'image/png' },
-      { url: 'https://cdn.abacus.ai/images/28e9fcaf-c2ac-4e96-8938-7b1e420454b1.png', sizes: '512x512', type: 'image/png' }
+      { url: '/images/stamp-8.png', sizes: '192x192', type: 'image/png' },
+      { url: '/images/stamp-2.png', sizes: '512x512', type: 'image/png' }
     ],
-    apple: { url: 'https://cdn.abacus.ai/images/60c2a3c9-2bba-4f98-aedf-4307b8765618.png', sizes: '192x192', type: 'image/png' }
+    apple: { url: '/images/stamp-8.png', sizes: '192x192', type: 'image/png' }
   }
 };
 
