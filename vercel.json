@@ -1,0 +1,12 @@
+{
+  "framework": "nextjs",
+  "rootDirectory": "app",
+  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "functions": {
+    "api/**/*.ts": {
+      "maxDuration": 30
+    }
+  }
+}
