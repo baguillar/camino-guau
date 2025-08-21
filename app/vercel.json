@@ -1,11 +1,6 @@
 {
   "version": 2,
   "buildCommand": "cd app && npm run build",
-  "outputDirectory": "app/.next",
   "installCommand": "cd app && npm install",
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "vercel/node@20.x"
-    }
-  }
+  "outputDirectory": "app/.next"
 }
