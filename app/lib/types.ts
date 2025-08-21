@@ -1,28 +1,51 @@
-export type Expense = {
-  id: string
-  amount: number
-  category: string
-  description: string
-  date: Date
+
+import type { User as PrismaUser, Role, Walk as PrismaWalk, Achievement as PrismaAchievement, UserAchievement as PrismaUserAchievement, AchievementCategory } from "@prisma/client"
+
+export interface User extends PrismaUser {
+  role: Role
 }
 
-export type ExpenseFormData = Omit<Expense, 'id' | 'date'> & {
-  date: string
+export interface Walk extends PrismaWalk {
+  user: User
 }
 
-export const EXPENSE_CATEGORIES = [
-  'Food',
-  'Transportation',
-  'Housing',
-  'Utilities',
-  'Entertainment',
-  'Healthcare',
-  'Shopping',
-  'Education',
-  'Other'
-] as const
+export interface Achievement extends PrismaAchievement {
+  category: AchievementCategory
+  users: UserAchievement[]
+}
 
-export type DateRange = {
-  from: Date | undefined
-  to: Date | undefined
+export interface UserAchievement extends PrismaUserAchievement {
+  user: User
+  achievement: Achievement
+}
+
+export interface DashboardStats {
+  totalWalks: number
+  totalKilometers: number
+  currentStreak: number
+  bestStreak: number
+  recentWalks: Walk[]
+  unlockedAchievements: number
+  totalAchievements: number
+}
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string
+      email: string
+      name?: string
+      role: Role
+    }
+  }
+  
+  interface User {
+    role: Role
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    role: Role
+  }
 }

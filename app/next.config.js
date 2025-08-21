@@ -1,67 +1,19 @@
-
 const path = require('path');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Configuración optimizada para Vercel
-  distDir: '.next',
-  
+  distDir: process.env.NEXT_DIST_DIR || '.next',
+  output: process.env.NEXT_OUTPUT_MODE,
   experimental: {
-    // Remover outputFileTracingRoot que puede causar problemas en Vercel
-    serverComponentsExternalPackages: ['prisma'],
+    outputFileTracingRoot: path.join(__dirname, '../'),
   },
-  
   eslint: {
     ignoreDuringBuilds: true,
   },
-  
   typescript: {
     ignoreBuildErrors: false,
   },
-  
-  // Optimización de imágenes para Vercel
-  images: { 
-    unoptimized: false, // Cambiar a false para optimización en Vercel
-    domains: [], // Agregar dominios externos si es necesario
-  },
-  
-  // Configuración de headers para PWA
-  async headers() {
-    return [
-      {
-        source: '/sw.js',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=0, must-revalidate',
-          },
-          {
-            key: 'Service-Worker-Allowed',
-            value: '/',
-          },
-        ],
-      },
-      {
-        source: '/manifest.json',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-    ];
-  },
-  
-  // Configuración para archivos estáticos
-  async rewrites() {
-    return [
-      {
-        source: '/api/files/:path*',
-        destination: '/api/files/:path*',
-      },
-    ];
-  },
+  images: { unoptimized: true },
 };
 
 module.exports = nextConfig;

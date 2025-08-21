@@ -1,73 +1,86 @@
 
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
-import { redirect } from 'next/navigation';
-import { AdminClient } from '@/components/admin/admin-client';
-import { prisma } from '@/lib/db';
+import { redirect } from 'next/navigation'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { isAdmin } from '@/lib/auth'
+import { prisma } from '@/lib/db'
+import { AdminLayout } from '@/components/admin/admin-layout'
+import { AdminDashboard } from '@/components/admin/admin-dashboard'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic"
+
+async function getAdminData() {
+  const [users, walks, achievements, appConfig] = await Promise.all([
+    prisma.user.findMany({
+      orderBy: { joinedDate: 'desc' },
+      take: 10,
+      include: {
+        walks: { take: 1, orderBy: { date: 'desc' } },
+        achievements: { take: 3 },
+      },
+    }),
+    prisma.walk.findMany({
+      orderBy: { date: 'desc' },
+      take: 10,
+      include: { user: true },
+    }),
+    prisma.achievement.findMany({
+      orderBy: { sortOrder: 'asc' },
+      include: { users: { include: { user: true } } },
+    }),
+    prisma.appConfig.findMany(),
+  ])
+
+  // Calculate stats
+  const totalUsers = await prisma.user.count()
+  const totalWalks = await prisma.walk.count()
+  const totalKilometers = await prisma.walk.aggregate({
+    _sum: { kilometers: true },
+  })
+  const totalAchievements = await prisma.achievement.count()
+
+  const last30Days = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+  const recentUsers = await prisma.user.count({
+    where: { joinedDate: { gte: last30Days } },
+  })
+  const recentWalks = await prisma.walk.count({
+    where: { date: { gte: last30Days } },
+  })
+
+  return {
+    users,
+    walks,
+    achievements,
+    appConfig,
+    stats: {
+      totalUsers,
+      totalWalks,
+      totalKilometers: totalKilometers._sum.kilometers || 0,
+      totalAchievements,
+      recentUsers,
+      recentWalks,
+    },
+  }
+}
 
 export default async function AdminPage() {
-  const session = await getServerSession(authOptions);
-  
-  if (!session?.user) {
-    redirect('/auth');
+  const session = await getServerSession(authOptions)
+
+  if (!session?.user || !isAdmin(session.user.role)) {
+    redirect('/dashboard')
   }
 
-  // Verificar si es admin
-  const user = await prisma?.user?.findUnique({
-    where: { id: session.user.id },
-    select: { isAdmin: true }
-  });
-
-  if (!user?.isAdmin) {
-    redirect('/dashboard');
-  }
-
-  // Obtener datos para el dashboard admin
-  const stats = await Promise.all([
-    prisma?.user?.count(),
-    prisma?.event?.count(),
-    prisma?.userProgress?.aggregate({
-      _sum: { totalKilometers: true }
-    }),
-    prisma?.attendance?.count({ where: { attended: true } })
-  ]);
-
-  const recentEvents = await prisma?.event?.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 10,
-    include: {
-      attendances: {
-        where: { attended: true },
-        include: { user: true }
-      },
-      _count: {
-        select: { attendances: true }
-      }
-    }
-  });
-
-  const recentUsers = await prisma?.user?.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 10,
-    include: {
-      userProgress: true,
-      dogs: true
-    }
-  });
+  const data = await getAdminData()
 
   return (
-    <AdminClient 
-      stats={{
-        totalUsers: stats[0] || 0,
-        totalEvents: stats[1] || 0,
-        totalKilometers: stats[2]?._sum?.totalKilometers || 0,
-        totalAttendances: stats[3] || 0
-      }}
-      recentEvents={recentEvents || []}
-      recentUsers={recentUsers || []}
-      session={session}
-    />
-  );
+    <AdminLayout>
+      <AdminDashboard 
+        users={data.users}
+        walks={data.walks}
+        achievements={data.achievements}
+        appConfig={data.appConfig}
+        stats={data.stats}
+      />
+    </AdminLayout>
+  )
 }

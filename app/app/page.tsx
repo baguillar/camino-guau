@@ -1,15 +1,16 @@
+import { redirect } from 'next/navigation'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { LandingPage } from '@/components/landing-page'
 
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
-import { redirect } from 'next/navigation';
-import { AuthForm } from '@/components/auth/auth-form';
-
-export default async function HomePage() {
-  const session = await getServerSession(authOptions);
+export default async function Home() {
+  const session = await getServerSession(authOptions)
   
-  if (session) {
-    redirect('/dashboard');
+  // Redirect authenticated users to dashboard
+  if (session?.user) {
+    redirect('/dashboard')
   }
 
-  return <AuthForm />;
+  // Show landing page for non-authenticated users
+  return <LandingPage />
 }

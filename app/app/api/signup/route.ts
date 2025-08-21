@@ -1,73 +1,53 @@
 
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
-import bcrypt from 'bcryptjs';
+import { NextRequest, NextResponse } from 'next/server'
+import bcrypt from 'bcryptjs'
+import { prisma } from '@/lib/db'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic"
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, firstName, lastName } = await req.json();
+    const { email, password, name } = await req.json()
 
-    if (!email || !password || !firstName) {
-      return NextResponse.json(
-        { error: 'Email, contraseña y nombre son requeridos' },
-        { status: 400 }
-      );
+    if (!email || !password || !name) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // Verificar si el usuario ya existe
-    const existingUser = await prisma?.user?.findUnique({
-      where: { email }
-    });
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    })
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: 'Ya existe un usuario con este email' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'User already exists' }, { status: 400 })
     }
 
-    // Hash de la contraseña
-    const hashedPassword = await bcrypt.hash(password, 12);
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Crear el usuario
-    const user = await prisma?.user?.create({
+    // Create user
+    const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
-        firstName,
-        lastName,
-        name: `${firstName} ${lastName || ''}`.trim(),
-      }
-    });
+        name,
+        role: 'USER',
+      },
+    })
 
-    // Crear progreso inicial del usuario
-    await prisma?.userProgress?.create({
-      data: {
-        userId: user?.id || '',
-        totalKilometers: 0,
-        eventsCompleted: 0,
-        stampsCollected: 0,
-        currentLevel: 1,
-        experiencePoints: 0,
-      }
-    });
-
-    return NextResponse.json({
-      message: 'Usuario creado exitosamente',
-      user: {
-        id: user?.id,
-        email: user?.email,
-        name: user?.name
-      }
-    });
+    return NextResponse.json({ 
+      user: { 
+        id: user.id, 
+        email: user.email, 
+        name: user.name,
+        role: user.role
+      } 
+    }, { status: 201 })
 
   } catch (error) {
-    console.error('Error al crear usuario:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    console.error('Signup error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

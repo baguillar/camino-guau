@@ -1,58 +1,46 @@
+import type { Metadata, Viewport } from "next";
+import { Inter } from 'next/font/google'
+import './globals.css'
+import { Providers } from '@/components/providers'
+import { Toaster } from '@/components/ui/toaster'
 
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-import { SessionProvider } from '@/components/providers/session-provider';
-import { ThemeProvider } from '@/components/theme-provider';
-import { PWAInstall } from '@/components/pwa/pwa-install';
-import { PushManager } from '@/components/push-notifications/push-manager';
-
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Camino Guau - Tu Pasaporte Digital Perruno',
-  description: 'Acompaña a tu perro en una aventura gamificada por el Camino de Santiago. Colecciona sellos, suma kilómetros y desbloquea logros en esta PWA.',
-  manifest: '/manifest.json',
+  title: "Camino Guau - Tu compañero de aventuras caninas",
+  description: "Registra y gamifica tus caminatas con tu perro. Desbloquea logros y mantén un registro de tus aventuras.",
+  manifest: "/manifest.json",
   icons: {
-    icon: [
-      { url: '/images/stamp-8.png', sizes: '192x192', type: 'image/png' },
-      { url: '/images/stamp-2.png', sizes: '512x512', type: 'image/png' }
-    ],
-    apple: { url: '/images/stamp-8.png', sizes: '192x192', type: 'image/png' }
-  }
+    icon: "/icons/icon-192.png",
+    apple: "/icons/apple-touch-icon.png",
+  },
 };
 
-export function generateViewport() {
-  return {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    themeColor: '#f97316',
-  };
-}
+export const viewport: Viewport = {
+  themeColor: "#60B5FF",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <head>
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-      </head>
-      <body className={inter.className} suppressHydrationWarning>
-        <SessionProvider>
-          <ThemeProvider>
-            {children}
-            <PWAInstall />
-            <PushManager />
-          </ThemeProvider>
-        </SessionProvider>
+      <body className={inter.className}>
+        <Providers
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster />
+        </Providers>
       </body>
     </html>
-  );
+  )
 }

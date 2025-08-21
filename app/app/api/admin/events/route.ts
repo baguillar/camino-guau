@@ -1,74 +1,61 @@
 
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
-import { nanoid } from 'nanoid';
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/db'
 
-export async function POST(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user || session.user.role !== 'ADMIN') {
+      return NextResponse.json(
+        { error: 'No autorizado' },
+        { status: 403 }
+      )
     }
-
-    // Verificar si es admin
-    const user = await prisma?.user?.findUnique({
-      where: { id: session.user.id },
-      select: { isAdmin: true }
-    });
-
-    if (!user?.isAdmin) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
-    }
-
-    const { name, description, date, location, kilometers } = await req.json();
-
-    if (!name || !date || !kilometers) {
-      return NextResponse.json({ error: 'Campos requeridos faltantes' }, { status: 400 });
-    }
-
-    const event = await prisma?.event?.create({
-      data: {
-        name,
-        description: description || null,
-        date: new Date(date),
-        location: location || null,
-        kilometers: parseFloat(kilometers),
-        qrCode: nanoid(12)
-      }
-    });
-
-    return NextResponse.json(event);
-  } catch (error) {
-    console.error('Error creating event:', error);
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
-  }
-}
-
-export async function GET(req: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-    }
-
-    const events = await prisma?.event?.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: {
-        attendances: {
-          where: { attended: true },
-          include: { user: { select: { firstName: true, name: true } } }
-        },
-        _count: {
-          select: { attendances: true }
+    
+    const events = await prisma.eventRoute.findMany({
+      where: {
+        isActive: true,
+        eventDate: {
+          gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Include events from last 7 days
         }
-      }
-    });
+      },
+      include: {
+        eventParticipants: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            }
+          },
+          orderBy: [
+            {
+              attendanceConfirmed: 'asc' // Pending first
+            },
+            {
+              registeredAt: 'asc'
+            }
+          ]
+        }
+      },
+      orderBy: [
+        {
+          eventDate: 'desc'
+        }
+      ]
+    })
 
-    return NextResponse.json(events);
+    return NextResponse.json(events)
   } catch (error) {
-    console.error('Error fetching events:', error);
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+    console.error('Error fetching admin events:', error)
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    )
   }
 }

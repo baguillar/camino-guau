@@ -1,7 +1,7 @@
-
 generator client {
     provider = "prisma-client-js"
-    binaryTargets = ["native", "rhel-openssl-1.0.x", "linux-musl-openssl-3.0.x"]
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/camino_guau_improved/app/node_modules/.prisma/client"
 }
 
 datasource db {
@@ -40,130 +40,26 @@ model User {
   id            String    @id @default(cuid())
   name          String?
   email         String    @unique
+  password      String
   emailVerified DateTime?
   image         String?
-  password      String?
-  firstName     String?
-  lastName      String?
-  isAdmin       Boolean   @default(false)
-  pushToken     String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  role          Role      @default(USER)
   
-  accounts       Account[]
-  sessions       Session[]
-  dogs           Dog[]
-  attendances    Attendance[]
-  userStamps     UserStamp[]
-  achievements   UserAchievement[]
-  userProgress   UserProgress?
-  entryCodesUsed EntryCodeUsage[]
-}
+  // Camino Guau specific fields
+  totalKilometers Float    @default(0)
+  totalWalks      Int      @default(0)
+  currentStreak   Int      @default(0)
+  bestStreak      Int      @default(0)
+  lastWalkDate    DateTime?
+  joinedDate      DateTime @default(now())
+  
+  accounts    Account[]
+  sessions    Session[]
+  walks       Walk[]
+  achievements UserAchievement[]
+  eventParticipations EventParticipant[]
 
-model Dog {
-  id        String   @id @default(cuid())
-  name      String
-  breed     String?
-  image     String?
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Event {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  date        DateTime
-  location    String?
-  kilometers  Float
-  qrCode      String   @unique
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  attendances Attendance[]
-  stamps      Stamp[]
-  entryCodes  EntryCode[]
-}
-
-model Attendance {
-  id        String   @id @default(cuid())
-  userId    String
-  eventId   String
-  attended  Boolean  @default(false)
-  qrScanned Boolean  @default(false)
-  createdAt DateTime @default(now())
-  
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  
-  @@unique([userId, eventId])
-}
-
-model Achievement {
-  id          String @id @default(cuid())
-  name        String
-  description String
-  icon        String
-  type        String // 'kilometers', 'events', 'special'
-  threshold   Float  // valor requerido para desbloquear
-  order       Int    @default(0)
-  
-  userAchievements UserAchievement[]
-}
-
-model UserAchievement {
-  id            String   @id @default(cuid())
-  userId        String
-  achievementId String
-  unlockedAt    DateTime @default(now())
-  
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
-  
-  @@unique([userId, achievementId])
-}
-
-model Stamp {
-  id          String  @id @default(cuid())
-  name        String
-  description String?
-  image       String
-  eventId     String
-  categoryId  String?
-  rarity      String  @default("common") // common, rare, epic, legendary
-  
-  event      Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  category   StampCategory? @relation(fields: [categoryId], references: [id])
-  userStamps UserStamp[]
-}
-
-model UserStamp {
-  id        String   @id @default(cuid())
-  userId    String
-  stampId   String
-  earnedAt  DateTime @default(now())
-  
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  stamp Stamp @relation(fields: [stampId], references: [id], onDelete: Cascade)
-  
-  @@unique([userId, stampId])
-}
-
-model UserProgress {
-  id               String   @id @default(cuid())
-  userId           String   @unique
-  totalKilometers  Float    @default(0)
-  eventsCompleted  Int      @default(0)
-  stampsCollected  Int      @default(0)
-  currentLevel     Int      @default(1)
-  experiencePoints Int      @default(0)
-  updatedAt        DateTime @updatedAt
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("users")
 }
 
 model VerificationToken {
@@ -174,50 +70,124 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model EntryCode {
+model EventRoute {
   id          String   @id @default(cuid())
-  code        String   @unique
-  eventId     String
-  kilometers  Float
-  isUsed      Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  expiresAt   DateTime?
-  
-  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  usage EntryCodeUsage?
-}
-
-model EntryCodeUsage {
-  id          String   @id @default(cuid())
-  entryCodeId String   @unique
-  userId      String
-  usedAt      DateTime @default(now())
-  
-  entryCode EntryCode @relation(fields: [entryCodeId], references: [id], onDelete: Cascade)
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Notification {
-  id        String   @id @default(cuid())
-  userId    String?
-  title     String
-  message   String
-  type      String   // 'achievement', 'event', 'milestone', 'general'
-  data      Json?
-  isRead    Boolean  @default(false)
-  isSent    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  
-  @@index([userId, isRead])
-  @@index([isSent, createdAt])
-}
-
-model StampCategory {
-  id          String @id @default(cuid())
   name        String
   description String?
-  color       String @default("#f97316")
-  icon        String @default("🏆")
+  location    String
+  distance    Float
+  difficulty  String   @default("EASY") // EASY, MEDIUM, HARD
   
-  stamps Stamp[]
+  // Nuevos campos para eventos con entrada
+  eventDate   DateTime
+  maxParticipants Int?
+  entryPrice      Float?
+  requiresConfirmation Boolean @default(true)
+  
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  walks Walk[]
+  eventParticipants EventParticipant[]
+  
+  @@map("event_routes")
+}
+
+model EventParticipant {
+  id              String   @id @default(cuid())
+  userId          String
+  eventRouteId    String
+  registeredAt    DateTime @default(now())
+  attendanceConfirmed Boolean @default(false)
+  confirmationCode    String @unique
+  confirmedAt         DateTime?
+  confirmedBy         String? // ID del admin que confirmó
+  
+  // Feedback post-evento
+  rating          Int?     // 1-5 estrellas
+  feedback        String?
+  
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventRoute      EventRoute @relation(fields: [eventRouteId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, eventRouteId])
+  @@map("event_participants")
+}
+
+model Walk {
+  id          String   @id @default(cuid())
+  userId      String
+  kilometers  Float
+  duration    Int?     // in minutes
+  date        DateTime @default(now())
+  notes       String?
+  weather     String?
+  dogMood     String?
+  
+  // New fields for EventosGuau routes
+  eventRouteId String?
+  dogCondition String?  // "excelente", "bueno", "regular", "cansado"
+  userFeedback String?  // User's general feedback about the walk
+  rating       Int?     // 1-5 stars rating
+  
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventRoute EventRoute? @relation(fields: [eventRouteId], references: [id], onDelete: SetNull)
+  
+  @@map("walks")
+}
+
+model Achievement {
+  id          String @id @default(cuid())
+  name        String @unique
+  description String
+  icon        String
+  category    AchievementCategory
+  
+  // Requirements
+  kmRequired      Float?
+  walksRequired   Int?
+  streakRequired  Int?
+  isActive        Boolean @default(true)
+  sortOrder       Int     @default(0)
+  
+  users UserAchievement[]
+  
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id            String    @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime  @default(now())
+  progress      Float     @default(0)
+  
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
+}
+
+model AppConfig {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+  
+  @@map("app_config")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum AchievementCategory {
+  DISTANCE
+  WALKS
+  STREAK
+  SPECIAL
+  CONSTANCY  // For consecutive event participation
+  EVENTROUTE // For completing specific routes
 }
