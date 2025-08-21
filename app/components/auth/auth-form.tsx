@@ -91,7 +91,7 @@ export function AuthForm() {
         >
           <div className="relative w-24 h-24 mx-auto mb-4">
             <Image
-              src="https://cdn.abacus.ai/images/c2f25568-9557-43b0-8f11-55cc980bf876.png"
+              src="../public/images/logo_512.png"
               alt="Camino Guau"
               fill
               className="object-contain"

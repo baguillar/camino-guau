@@ -32,7 +32,7 @@ export function Header({ user }: HeaderProps) {
         <Link href="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <div className="relative w-10 h-10">
             <Image
-              src="https://cdn.abacus.ai/images/c2f25568-9557-43b0-8f11-55cc980bf876.png"
+              src="../public/images/logo_512.png"
               alt="Camino Guau"
               fill
               className="object-contain"
