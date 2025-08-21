@@ -1,11 +1,13 @@
+
 {
   "name": "app",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/validate-env.js && next build",
     "start": "next start",
     "lint": "next lint",
+    "validate-env": "node scripts/validate-env.js",
     "create-admin": "tsx --require dotenv/config scripts/create-admin.ts",
     "postinstall": "prisma generate --schema=./prisma/schema.prisma"
   },
@@ -65,6 +67,7 @@
     "@radix-ui/react-toggle": "1.1.0",
     "@radix-ui/react-toggle-group": "1.1.0",
     "@radix-ui/react-tooltip": "1.1.2",
+    "@stackframe/stack": "^2.5.0",
     "@tanstack/react-query": "5.0.0",
     "@types/bcryptjs": "2.4.6",
     "@types/jsonwebtoken": "9.0.5",
