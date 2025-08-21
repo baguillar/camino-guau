@@ -7,7 +7,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/validate-env.js && prisma generate && prisma db push && tsx scripts/setup-database.ts && next build",
+    "build": "node scripts/validate-env.js && prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "validate-env": "node scripts/validate-env.js",
