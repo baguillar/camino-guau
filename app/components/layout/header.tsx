@@ -32,7 +32,7 @@ export function Header({ user }: HeaderProps) {
         <Link href="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <div className="relative w-10 h-10">
             <Image
-              src="../public/images/logo_512.png"
+              src="/public/images/logo_512.png"
               alt="Camino Guau"
               fill
               className="object-contain"

@@ -91,7 +91,7 @@ export function AuthForm() {
         >
           <div className="relative w-24 h-24 mx-auto mb-4">
             <Image
-              src="../public/images/logo_512.png"
+              src="/public/images/logo_512.png"
               alt="Camino Guau"
               fill
               className="object-contain"
