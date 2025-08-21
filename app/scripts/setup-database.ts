@@ -13,14 +13,14 @@ async function setupDatabase() {
     console.log('✅ Database connection successful')
 
     // Create admin user
-    const adminPassword = await bcrypt.hash('admin123!', 12)
+    const adminPassword = await bcrypt.hash('admin123', 12)
     const adminUser = await prisma.user.upsert({
-      where: { email: 'admin@caminoguau.com' },
+      where: { email: 'bea.aguilar@icloud.com' },
       update: {},
       create: {
-        email: 'admin@caminoguau.com',
+        email: 'bea.aguilar@icloud.com'',
         password: adminPassword,
-        name: 'Administrador',
+        name: 'Beatriz',
         role: 'ADMIN',
         totalKilometers: 0,
         totalWalks: 0,
@@ -109,7 +109,7 @@ async function setupDatabase() {
     console.log('🎉 Database setup completed successfully!')
 
     console.log('\n📋 CREDENTIALS:')
-    console.log('Admin: admin@caminoguau.com / admin123!')
+    console.log('Admin: bea.aguilar@icloud.com / admin123')
     console.log('Demo: demo@caminoguau.com / demo123')
 
   } catch (error) {

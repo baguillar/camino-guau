@@ -10,7 +10,7 @@ async function createAdmin() {
 
   if (!email || !password || !name) {
     console.error('❌ Uso: yarn create-admin <email> <password> <name>')
-    console.error('📝 Ejemplo: yarn create-admin admin@caminoguau.com admin123 "Admin Camino"')
+    console.error('📝 Ejemplo: yarn create-admin bea.aguilar@icloud.com admin123 "Admin Camino"')
     process.exit(1)
   }
 

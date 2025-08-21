@@ -17,9 +17,9 @@ INSERT INTO users (
   "joinedDate"
 ) VALUES (
   gen_random_uuid()::text,  -- Genera un UUID único
-  '[TU_EMAIL@EJEMPLO.COM]',  -- Cambia por tu email
+  '[bea.aguilar@icloud.com]',  -- Cambia por tu email
   '$2a$12$LQv3c1yqBpVHDn2XLaV0uu.QZQzP4GYJj6u8zQ0QGKvKzK9zKzK9z',  -- Hash de "admin123"
-  '[TU_NOMBRE]',             -- Cambia por tu nombre
+  'Beatriz',             -- Cambia por tu nombre
   'ADMIN',                   -- Rol de administrador
   0,                         -- Kilómetros iniciales
   0,                         -- Paseos iniciales
