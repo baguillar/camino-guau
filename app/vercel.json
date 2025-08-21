@@ -1,12 +1,19 @@
+
 {
-  "framework": "nextjs",
-  "rootDirectory": "app",
-  "installCommand": "npm install --legacy-peer-deps",
-  "buildCommand": "npx prisma generate --schema=./prisma/schema.prisma && npm run build",
+  "buildCommand": "prisma generate && next build",
   "outputDirectory": ".next",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
   "functions": {
-    "api/**/*.ts": {
+    "app/api/**/*.ts": {
       "maxDuration": 30
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    }
+  ]
 }
