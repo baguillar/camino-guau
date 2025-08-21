@@ -18,7 +18,7 @@ async function setupDatabase() {
       where: { email: 'bea.aguilar@icloud.com' },
       update: {},
       create: {
-        email: 'bea.aguilar@icloud.com'',
+        email: 'bea.aguilar@icloud.com',
         password: adminPassword,
         name: 'Beatriz',
         role: 'ADMIN',
