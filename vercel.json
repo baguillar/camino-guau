@@ -1,0 +1,15 @@
+{
+  "buildCommand": "npm install --legacy-peer-deps && npx prisma generate --schema=./prisma/schema.prisma && npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install --legacy-peer-deps",
+  "framework": "nextjs",
+  "rootDirectory": "app",
+  "functions": {
+    "api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "PRISMA_GENERATE_SKIP_POSTINSTALL_HINT": "true"
+  }
+}
