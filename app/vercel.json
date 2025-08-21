@@ -1,0 +1,14 @@
+{
+  "buildCommand": "cd app && npm install && npx prisma generate && npm run build",
+  "outputDirectory": "app/.next",
+  "installCommand": "cd app && npm install",
+  "framework": "nextjs",
+  "functions": {
+    "app/app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "PRISMA_GENERATE_SKIP_POSTINSTALL_HINT": "true"
+  }
+}
