@@ -13,7 +13,7 @@ export default function CommentsPage() {
       throw new Error('Comment is required');
     }
 
-    await sql('INSERT INTO comments (comment) VALUES ($1)', [comment]);
+    await sql`INSERT INTO comments (comment) VALUES (${comment})`;  
   }
 
   return (
