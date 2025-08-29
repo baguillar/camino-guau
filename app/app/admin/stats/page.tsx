@@ -1,4 +1,3 @@
-
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
@@ -8,13 +7,25 @@ import { StatsOverview } from '@/components/admin/stats-overview'
 
 export const dynamic = "force-dynamic"
 
+// Definiciones de tipos para consultas SQL
+type MonthlyWalkResult = {
+  month: Date;
+  walks: bigint;
+  kilometers: number;
+};
+
+type MonthlyUserResult = {
+  month: Date;
+  users: bigint;
+};
+
 async function getStatsData() {
   const now = new Date()
   const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
   const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
   const lastYear = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
 
-  // Basic stats
+  // Estadísticas básicas
   const [
     totalUsers,
     totalWalks,
@@ -31,7 +42,7 @@ async function getStatsData() {
     prisma.eventParticipant.count()
   ])
 
-  // Recent activity
+  // Actividad reciente
   const [
     recentUsers,
     recentWalks,
@@ -46,7 +57,7 @@ async function getStatsData() {
     prisma.user.count({ where: { lastWalkDate: { gte: last30Days } } })
   ])
 
-  // Top users
+  // Top usuarios
   const topUsersByKm = await prisma.user.findMany({
     orderBy: { totalKilometers: 'desc' },
     take: 10,
@@ -71,19 +82,19 @@ async function getStatsData() {
     }
   })
 
-  // Monthly data for charts
-  const monthlyWalks = await prisma.$queryRaw`
+  // Datos mensuales para gráficos con tipos correctos
+  const monthlyWalks = await prisma.$queryRaw<MonthlyWalkResult[]>`
     SELECT 
       DATE_TRUNC('month', date) as month,
       COUNT(*) as walks,
-      SUM(kilometers) as kilometers
+      COALESCE(SUM(kilometers), 0) as kilometers
     FROM walks 
     WHERE date >= ${lastYear}
     GROUP BY DATE_TRUNC('month', date)
     ORDER BY month
   `
 
-  const monthlyUsers = await prisma.$queryRaw`
+  const monthlyUsers = await prisma.$queryRaw<MonthlyUserResult[]>`
     SELECT 
       DATE_TRUNC('month', "joinedDate") as month,
       COUNT(*) as users
@@ -93,7 +104,7 @@ async function getStatsData() {
     ORDER BY month
   `
 
-  // Achievement stats
+  // Estadísticas de logros
   const achievementStats = await prisma.achievement.findMany({
     include: {
       _count: {
@@ -109,7 +120,7 @@ async function getStatsData() {
     }
   })
 
-  // Event route stats
+  // Estadísticas de rutas de eventos
   const eventRouteStats = await prisma.eventRoute.findMany({
     include: {
       _count: {
@@ -147,8 +158,15 @@ async function getStatsData() {
       byWalks: topUsersByWalks
     },
     chartData: {
-      monthlyWalks,
-      monthlyUsers
+      monthlyWalks: monthlyWalks.map(item => ({
+        month: item.month,
+        walks: Number(item.walks),
+        kilometers: Number(item.kilometers || 0)
+      })),
+      monthlyUsers: monthlyUsers.map(item => ({
+        month: item.month,
+        users: Number(item.users)
+      }))
     },
     achievementStats,
     eventRouteStats
