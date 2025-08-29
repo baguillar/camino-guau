@@ -29,7 +29,7 @@ export function DogsManagement() {
   const [dogs, setDogs] = useState<Dog[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isFormOpen, setIsFormOpen] = useState(false)
-  const [editingDog, setEditingDog] = useState<Dog | null>(null)
+  const [editingDog, setEditingDog] = useState<Dog | undefined>(undefined)
 
   useEffect(() => {
     fetchDogs()
@@ -54,7 +54,7 @@ export function DogsManagement() {
   }
 
   const handleAddDog = () => {
-    setEditingDog(null)
+    setEditingDog(undefined)
     setIsFormOpen(true)
   }
 
@@ -69,13 +69,13 @@ export function DogsManagement() {
 
   const handleFormSave = () => {
     setIsFormOpen(false)
-    setEditingDog(null)
+    setEditingDog(undefined)
     fetchDogs() // Refresh the list
   }
 
   const handleFormCancel = () => {
     setIsFormOpen(false)
-    setEditingDog(null)
+    setEditingDog(undefined)
   }
 
   if (isLoading) {

@@ -25,6 +25,13 @@ async function getUsersData() {
         include: {
           eventRoute: true
         }
+      },
+      _count: {
+        select: {
+          walks: true,
+          achievements: true,
+          eventParticipations: true
+        }
       }
     }
   })

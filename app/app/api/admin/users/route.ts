@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { Role } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,6 +24,9 @@ export async function GET(req: NextRequest) {
 
     const skip = (page - 1) * limit
 
+    // Validate role if provided
+    const validRole = role && Object.values(Role).includes(role as Role) ? role as Role : undefined
+
     const where = {
       ...(search && {
         OR: [
@@ -30,7 +34,7 @@ export async function GET(req: NextRequest) {
           { email: { contains: search, mode: 'insensitive' as const } }
         ]
       }),
-      ...(role && { role })
+      ...(validRole && { role: validRole })
     }
 
     const [users, total] = await Promise.all([
@@ -92,12 +96,15 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
 
+    // Validate role if provided
+    const validRoleUpdate = role && Object.values(Role).includes(role as Role) ? role as Role : undefined
+
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
         ...(name && { name }),
         ...(email && { email }),
-        ...(role && { role }),
+        ...(validRoleUpdate && { role: validRoleUpdate }),
         ...(totalKilometers !== undefined && { totalKilometers: parseFloat(totalKilometers) }),
         ...(totalWalks !== undefined && { totalWalks: parseInt(totalWalks) })
       },

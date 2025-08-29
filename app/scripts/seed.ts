@@ -1,6 +1,7 @@
 
 
 import { prisma } from '../lib/db'
+import { AchievementCategory } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 async function main() {
@@ -32,7 +33,7 @@ async function main() {
       name: 'Primer Paso',
       description: 'Completa tu primer paseo',
       icon: '👣',
-      category: 'WALKS',
+      category: AchievementCategory.WALKS,
       walksRequired: 1,
       sortOrder: 1
     },
@@ -40,7 +41,7 @@ async function main() {
       name: 'Caminante',
       description: 'Completa 10 paseos',
       icon: '🚶',
-      category: 'WALKS',
+      category: AchievementCategory.WALKS,
       walksRequired: 10,
       sortOrder: 2
     },
@@ -48,7 +49,7 @@ async function main() {
       name: 'Explorador',
       description: 'Camina 5 kilómetros',
       icon: '🗺️',
-      category: 'DISTANCE',
+      category: AchievementCategory.DISTANCE,
       kmRequired: 5,
       sortOrder: 3
     },
@@ -56,7 +57,7 @@ async function main() {
       name: 'Maratonista',
       description: 'Camina 50 kilómetros',
       icon: '🏃',
-      category: 'DISTANCE',
+      category: AchievementCategory.DISTANCE,
       kmRequired: 50,
       sortOrder: 4
     },
@@ -64,7 +65,7 @@ async function main() {
       name: 'Constante',
       description: 'Mantén una racha de 7 días',
       icon: '🔥',
-      category: 'STREAK',
+      category: AchievementCategory.STREAK,
       streakRequired: 7,
       sortOrder: 5
     }
