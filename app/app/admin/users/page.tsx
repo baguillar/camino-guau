@@ -1,4 +1,3 @@
-
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
@@ -8,49 +7,56 @@ import { UsersManagement } from '@/components/admin/users-management'
 
 export const dynamic = "force-dynamic"
 
-async function getUsersData() {
+async function getUsers() {
   const users = await prisma.user.findMany({
-    orderBy: { joinedDate: 'desc' },
     include: {
       walks: {
-        orderBy: { date: 'desc' },
-        take: 5
+        select: {
+          id: true,
+          userId: true,
+          kilometers: true,
+          duration: true,
+          date: true,
+          notes: true,
+          weather: true,
+          dogMood: true,
+          eventRouteId: true,
+          dogCondition: true,
+          userFeedback: true,
+          rating: true
+        }
       },
       achievements: {
         include: {
           achievement: true
         }
       },
-      eventParticipations: {
+      eventParticipants: {
         include: {
           eventRoute: true
         }
+      },
+      _count: {
+        select: {
+          walks: true,
+          achievements: true,
+          eventParticipants: true
+        }
       }
+    },
+    orderBy: {
+      joinedDate: 'desc'
     }
   })
 
-  const totalUsers = await prisma.user.count()
-  const activeUsers = await prisma.user.count({
-    where: {
-      lastWalkDate: {
-        gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-      }
-    }
-  })
+  // Transformar los datos para incluir totalKilometers y totalWalks
+  const transformedUsers = users.map(user => ({
+    ...user,
+    totalKilometers: user.walks.reduce((total, walk) => total + walk.kilometers, 0),
+    totalWalks: user._count.walks
+  }))
 
-  const usersByRole = await prisma.user.groupBy({
-    by: ['role'],
-    _count: true
-  })
-
-  return {
-    users,
-    stats: {
-      totalUsers,
-      activeUsers,
-      usersByRole
-    }
-  }
+  return transformedUsers
 }
 
 export default async function UsersPage() {
@@ -60,7 +66,7 @@ export default async function UsersPage() {
     redirect('/dashboard')
   }
 
-  const data = await getUsersData()
+  const users = await getUsers()
 
   return (
     <AdminLayout>
@@ -72,10 +78,7 @@ export default async function UsersPage() {
           </p>
         </div>
         
-        <UsersManagement 
-          users={data.users}
-          stats={data.stats}
-        />
+        <UsersManagement users={users} />
       </div>
     </AdminLayout>
   )
