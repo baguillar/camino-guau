@@ -1,12 +1,14 @@
 
+
 generator client {
     provider = "prisma-client-js"
     binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/camino_guau_fixed/app/node_modules/.prisma/client"
 }
 
 datasource db {
     provider = "postgresql"
-    url      = env("POSTGRES_PRISMA_URL")
+    url      = env("DATABASE_URL")
 }
 
 model Account {
@@ -56,10 +58,32 @@ model User {
   accounts    Account[]
   sessions    Session[]
   walks       Walk[]
+  dogs        Dog[]
   achievements UserAchievement[]
   eventParticipations EventParticipant[]
 
   @@map("users")
+}
+
+model Dog {
+  id              String   @id @default(cuid())
+  userId          String
+  name            String
+  breed           String?  // Raza escribible
+  sex             DogSex   @default(UNKNOWN)
+  age             Int?     // En años
+  photo           String?  // URL de la foto
+  obedience       Int      @default(5) // 1-10 scale
+  socializationWithDogs Int @default(5) // 1-10 scale
+  socializationWithPeople Int @default(5) // 1-10 scale
+  specialCharacteristic String? // Característica especial
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("dogs")
 }
 
 model VerificationToken {
@@ -181,6 +205,12 @@ model AppConfig {
 enum Role {
   USER
   ADMIN
+}
+
+enum DogSex {
+  MALE
+  FEMALE
+  UNKNOWN
 }
 
 enum AchievementCategory {

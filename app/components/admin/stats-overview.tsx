@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -30,73 +31,7 @@ import {
 } from 'recharts'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-
-interface StatsData {
-  basicStats: {
-    totalUsers: number
-    totalWalks: number
-    totalKilometers: number
-    totalAchievements: number
-    totalEventRoutes: number
-    totalEventParticipants: number
-  }
-  recentActivity: {
-    recentUsers: number
-    recentWalks: number
-    recentEventParticipants: number
-    activeUsers7Days: number
-    activeUsers30Days: number
-  }
-  topUsers: {
-    byKilometers: Array<{
-      id: string
-      name: string | null
-      email: string
-      totalKilometers: number
-      totalWalks: number
-    }>
-    byWalks: Array<{
-      id: string
-      name: string | null
-      email: string
-      totalKilometers: number
-      totalWalks: number
-    }>
-  }
-  chartData: {
-    monthlyWalks: Array<{
-      month: Date
-      walks: number
-      kilometers: number
-    }>
-    monthlyUsers: Array<{
-      month: Date
-      users: number
-    }>
-  }
-  achievementStats: Array<{
-    id: string
-    name: string
-    description: string
-    icon: string
-    category: string
-    _count: {
-      users: number
-    }
-  }>
-  eventRouteStats: Array<{
-    id: string
-    name: string
-    location: string
-    distance: number
-    difficulty: string
-    eventDate: Date
-    _count: {
-      eventParticipants: number
-      walks: number
-    }
-  }>
-}
+import { StatsData } from '@/lib/types'
 
 interface StatsOverviewProps {
   data: StatsData
@@ -107,21 +42,21 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8']
 export function StatsOverview({ data }: StatsOverviewProps) {
   const { basicStats, recentActivity, topUsers, chartData, achievementStats, eventRouteStats } = data
 
-  // Prepare chart data
-  const monthlyData = chartData.monthlyWalks.map(item => ({
-    month: format(new Date(item.month), 'MMM yyyy', { locale: es }),
-    walks: Number(item.walks),
-    kilometers: Number(item.kilometers)
+  // Prepare chart data with null safety
+  const monthlyData = (chartData?.monthlyWalks ?? []).map(item => ({
+    month: format(new Date(item?.month ?? new Date()), 'MMM yyyy', { locale: es }),
+    walks: Number(item?.walks ?? 0),
+    kilometers: Number(item?.kilometers ?? 0)
   }))
 
-  const userGrowthData = chartData.monthlyUsers.map(item => ({
-    month: format(new Date(item.month), 'MMM yyyy', { locale: es }),
-    users: Number(item.users)
+  const userGrowthData = (chartData?.monthlyUsers ?? []).map(item => ({
+    month: format(new Date(item?.month ?? new Date()), 'MMM yyyy', { locale: es }),
+    users: Number(item?.users ?? 0)
   }))
 
-  const achievementDistribution = achievementStats.slice(0, 5).map((achievement, index) => ({
-    name: achievement.name,
-    value: achievement._count.users,
+  const achievementDistribution = (achievementStats ?? []).slice(0, 5).map((achievement, index) => ({
+    name: achievement?.name ?? 'Sin nombre',
+    value: achievement?._count?.users ?? 0,
     color: COLORS[index % COLORS.length]
   }))
 
@@ -135,9 +70,9 @@ export function StatsOverview({ data }: StatsOverviewProps) {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{basicStats.totalUsers}</div>
+            <div className="text-2xl font-bold">{basicStats?.totalUsers ?? 0}</div>
             <p className="text-xs text-muted-foreground">
-              +{recentActivity.recentUsers} este mes
+              +{recentActivity?.recentUsers ?? 0} este mes
             </p>
           </CardContent>
         </Card>
@@ -148,9 +83,9 @@ export function StatsOverview({ data }: StatsOverviewProps) {
             <MapPin className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{basicStats.totalWalks}</div>
+            <div className="text-2xl font-bold">{basicStats?.totalWalks ?? 0}</div>
             <p className="text-xs text-muted-foreground">
-              +{recentActivity.recentWalks} este mes
+              +{recentActivity?.recentWalks ?? 0} este mes
             </p>
           </CardContent>
         </Card>
@@ -161,7 +96,7 @@ export function StatsOverview({ data }: StatsOverviewProps) {
             <Route className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{basicStats.totalKilometers.toFixed(1)}</div>
+            <div className="text-2xl font-bold">{(basicStats?.totalKilometers ?? 0).toFixed(1)}</div>
             <p className="text-xs text-muted-foreground">
               km recorridos
             </p>
@@ -174,7 +109,7 @@ export function StatsOverview({ data }: StatsOverviewProps) {
             <UserCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{recentActivity.activeUsers30Days}</div>
+            <div className="text-2xl font-bold">{recentActivity?.activeUsers30Days ?? 0}</div>
             <p className="text-xs text-muted-foreground">
               últimos 30 días
             </p>
@@ -193,9 +128,23 @@ export function StatsOverview({ data }: StatsOverviewProps) {
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={monthlyData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis yAxisId="left" />
-                <YAxis yAxisId="right" orientation="right" />
+                <XAxis 
+                  dataKey="month" 
+                  tickLine={false}
+                  tick={{ fontSize: 10 }}
+                  interval="preserveStartEnd"
+                />
+                <YAxis 
+                  yAxisId="left" 
+                  tickLine={false}
+                  tick={{ fontSize: 10 }}
+                />
+                <YAxis 
+                  yAxisId="right" 
+                  orientation="right" 
+                  tickLine={false}
+                  tick={{ fontSize: 10 }}
+                />
                 <Tooltip />
                 <Bar yAxisId="left" dataKey="walks" fill="#8884d8" name="Paseos" />
                 <Bar yAxisId="right" dataKey="kilometers" fill="#82ca9d" name="Kilómetros" />
@@ -213,10 +162,23 @@ export function StatsOverview({ data }: StatsOverviewProps) {
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={userGrowthData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
+                <XAxis 
+                  dataKey="month" 
+                  tickLine={false}
+                  tick={{ fontSize: 10 }}
+                  interval="preserveStartEnd"
+                />
+                <YAxis 
+                  tickLine={false}
+                  tick={{ fontSize: 10 }}
+                />
                 <Tooltip />
-                <Line type="monotone" dataKey="users" stroke="#8884d8" strokeWidth={2} />
+                <Line 
+                  type="monotone" 
+                  dataKey="users" 
+                  stroke="#8884d8" 
+                  strokeWidth={2} 
+                />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -232,18 +194,18 @@ export function StatsOverview({ data }: StatsOverviewProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {topUsers.byKilometers.slice(0, 5).map((user, index) => (
-                <div key={user.id} className="flex items-center justify-between">
+              {(topUsers?.byKilometers ?? []).slice(0, 5).map((user, index) => (
+                <div key={user?.id ?? index} className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <Badge variant="outline">#{index + 1}</Badge>
                     <div>
-                      <p className="font-medium">{user.name || 'Sin nombre'}</p>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                      <p className="font-medium">{user?.name ?? 'Sin nombre'}</p>
+                      <p className="text-sm text-muted-foreground">{user?.email ?? ''}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold">{user.totalKilometers.toFixed(1)} km</p>
-                    <p className="text-sm text-muted-foreground">{user.totalWalks} paseos</p>
+                    <p className="font-bold">{(user?.totalKilometers ?? 0).toFixed(1)} km</p>
+                    <p className="text-sm text-muted-foreground">{user?.totalWalks ?? 0} paseos</p>
                   </div>
                 </div>
               ))}
@@ -270,7 +232,7 @@ export function StatsOverview({ data }: StatsOverviewProps) {
                   dataKey="value"
                 >
                   {achievementDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell key={`cell-${index}`} fill={entry?.color ?? COLORS[0]} />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -289,44 +251,44 @@ export function StatsOverview({ data }: StatsOverviewProps) {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
             <div className="text-center">
-              <div className="text-2xl font-bold">{basicStats.totalEventRoutes}</div>
+              <div className="text-2xl font-bold">{basicStats?.totalEventRoutes ?? 0}</div>
               <p className="text-sm text-muted-foreground">Rutas Creadas</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold">{basicStats.totalEventParticipants}</div>
+              <div className="text-2xl font-bold">{basicStats?.totalEventParticipants ?? 0}</div>
               <p className="text-sm text-muted-foreground">Participaciones</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold">{recentActivity.recentEventParticipants}</div>
+              <div className="text-2xl font-bold">{recentActivity?.recentEventParticipants ?? 0}</div>
               <p className="text-sm text-muted-foreground">Este Mes</p>
             </div>
           </div>
 
           <div className="space-y-4">
             <h4 className="font-semibold">Rutas Más Populares</h4>
-            {eventRouteStats.slice(0, 5).map((route, index) => (
-              <div key={route.id} className="flex items-center justify-between p-3 border rounded-lg">
+            {(eventRouteStats ?? []).slice(0, 5).map((route, index) => (
+              <div key={route?.id ?? index} className="flex items-center justify-between p-3 border rounded-lg">
                 <div className="flex-1">
                   <div className="flex items-center space-x-2">
                     <Badge variant="outline">#{index + 1}</Badge>
-                    <h5 className="font-medium">{route.name}</h5>
+                    <h5 className="font-medium">{route?.name ?? 'Sin nombre'}</h5>
                     <Badge variant={
-                      route.difficulty === 'EASY' ? 'secondary' :
-                      route.difficulty === 'MEDIUM' ? 'default' : 'destructive'
+                      route?.difficulty === 'EASY' ? 'secondary' :
+                      route?.difficulty === 'MEDIUM' ? 'default' : 'destructive'
                     }>
-                      {route.difficulty}
+                      {route?.difficulty ?? 'EASY'}
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {route.location} • {route.distance} km
+                    {route?.location ?? ''} • {route?.distance ?? 0} km
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {format(new Date(route.eventDate), 'dd/MM/yyyy', { locale: es })}
+                    {route?.eventDate ? format(new Date(route.eventDate), 'dd/MM/yyyy', { locale: es }) : ''}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold">{route._count.eventParticipants} participantes</p>
-                  <p className="text-sm text-muted-foreground">{route._count.walks} paseos</p>
+                  <p className="font-bold">{route?._count?.eventParticipants ?? 0} participantes</p>
+                  <p className="text-sm text-muted-foreground">{route?._count?.walks ?? 0} paseos</p>
                 </div>
               </div>
             ))}
@@ -342,18 +304,18 @@ export function StatsOverview({ data }: StatsOverviewProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {achievementStats.slice(0, 10).map((achievement, index) => {
-              const percentage = (achievement._count.users / basicStats.totalUsers) * 100
+            {(achievementStats ?? []).slice(0, 10).map((achievement, index) => {
+              const percentage = ((achievement?._count?.users ?? 0) / (basicStats?.totalUsers ?? 1)) * 100
               return (
-                <div key={achievement.id} className="space-y-2">
+                <div key={achievement?.id ?? index} className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <Badge variant="outline">#{index + 1}</Badge>
-                      <span className="font-medium">{achievement.name}</span>
-                      <Badge variant="secondary">{achievement.category}</Badge>
+                      <span className="font-medium">{achievement?.name ?? 'Sin nombre'}</span>
+                      <Badge variant="secondary">{achievement?.category ?? 'SPECIAL'}</Badge>
                     </div>
                     <span className="text-sm font-medium">
-                      {achievement._count.users} usuarios ({percentage.toFixed(1)}%)
+                      {achievement?._count?.users ?? 0} usuarios ({percentage.toFixed(1)}%)
                     </span>
                   </div>
                   <Progress value={percentage} className="h-2" />

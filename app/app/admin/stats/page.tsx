@@ -1,10 +1,12 @@
 
+
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions, isAdmin } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { AdminLayout } from '@/components/admin/admin-layout'
 import { StatsOverview } from '@/components/admin/stats-overview'
+import { MonthlyWalkData, MonthlyUserData } from '@/lib/types'
 
 export const dynamic = "force-dynamic"
 
@@ -71,8 +73,12 @@ async function getStatsData() {
     }
   })
 
-  // Monthly data for charts
-  const monthlyWalks = await prisma.$queryRaw`
+  // Monthly data for charts with proper typing
+  const monthlyWalksRaw = await prisma.$queryRaw<Array<{
+    month: Date
+    walks: bigint
+    kilometers: number
+  }>>`
     SELECT 
       DATE_TRUNC('month', date) as month,
       COUNT(*) as walks,
@@ -83,7 +89,10 @@ async function getStatsData() {
     ORDER BY month
   `
 
-  const monthlyUsers = await prisma.$queryRaw`
+  const monthlyUsersRaw = await prisma.$queryRaw<Array<{
+    month: Date
+    users: bigint
+  }>>`
     SELECT 
       DATE_TRUNC('month', "joinedDate") as month,
       COUNT(*) as users
@@ -92,6 +101,18 @@ async function getStatsData() {
     GROUP BY DATE_TRUNC('month', "joinedDate")
     ORDER BY month
   `
+
+  // Transform the raw SQL results to proper types
+  const monthlyWalks: MonthlyWalkData[] = monthlyWalksRaw.map(item => ({
+    month: item.month,
+    walks: Number(item.walks),
+    kilometers: Number(item.kilometers)
+  }))
+
+  const monthlyUsers: MonthlyUserData[] = monthlyUsersRaw.map(item => ({
+    month: item.month,
+    users: Number(item.users)
+  }))
 
   // Achievement stats
   const achievementStats = await prisma.achievement.findMany({
