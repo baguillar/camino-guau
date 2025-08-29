@@ -1,4 +1,13 @@
 
+enum Role {
+  USER
+  ADMIN
+}
+
+enum DogSex {
+  MALE
+  FEMALE
+}
 
 generator client {
     provider = "prisma-client-js"
