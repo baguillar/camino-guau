@@ -103,13 +103,20 @@ async function getStatsData() {
   `
 
   // Transform the raw SQL results to proper types
-  const monthlyWalks: MonthlyWalkData[] = monthlyWalksRaw.map(item => ({
+  const monthlyWalks: MonthlyWalkData[] = monthlyWalksRaw.map((item: {
+    month: Date
+    walks: bigint
+    kilometers: number
+  }) => ({
     month: item.month,
     walks: Number(item.walks),
     kilometers: Number(item.kilometers)
   }))
 
-  const monthlyUsers: MonthlyUserData[] = monthlyUsersRaw.map(item => ({
+  const monthlyUsers: MonthlyUserData[] = monthlyUsersRaw.map((item: {
+    month: Date
+    users: bigint
+  }) => ({
     month: item.month,
     users: Number(item.users)
   }))

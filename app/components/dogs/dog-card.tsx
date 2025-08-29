@@ -25,7 +25,7 @@ interface DogCardProps {
     socializationWithPeople: number
     specialCharacteristic?: string | null
   }
-  onEdit: (dog: any) => void
+  onEdit: (dog: DogCardProps['dog']) => void
   onDelete: (dogId: string) => void
 }
 

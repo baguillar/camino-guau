@@ -20,7 +20,7 @@ export function LandingPage() {
     {
       icon: PawPrint,
       title: "Registra tus Caminatas",
-      description: "Lleva un control detallado de cada paseo con tu compañero canino"
+      description: "Lleva un control detallado de cada paseo con tu compañero canino y con Eventos GUAU"
     },
     {
       icon: Trophy,

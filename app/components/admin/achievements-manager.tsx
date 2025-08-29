@@ -289,7 +289,7 @@ interface AchievementFormProps {
   onSave: (data: Partial<Achievement>) => void
   isLoading: boolean
   iconOptions: string[]
-  categoryOptions: Array<{ value: string; label: string; icon: any }>
+  categoryOptions: Array<{ value: string; label: string; icon: React.ComponentType<any> }>
 }
 
 function AchievementForm({ 

@@ -25,7 +25,7 @@ export default function RegisterPage() {
           <CardHeader>
             <CardTitle className="text-center text-2xl">Crear Cuenta</CardTitle>
             <CardDescription className="text-center">
-              Únete a la comunidad de paseadores
+              Únete a la comunidad de Eventos GUAU
             </CardDescription>
           </CardHeader>
           <CardContent>
