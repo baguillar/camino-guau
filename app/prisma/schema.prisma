@@ -85,16 +85,22 @@ model EventRoute {
   @@map("event_routes")
 }
 
+enum DogSex {
+  MALE
+  FEMALE
+  UNKNOWN
+}
+
 model Dog {
   id          String   @id @default(cuid())
   userId      String
   name        String
   breed       String?
-  sex         String?
+  sex         DogSex?
   age         Int?
   photo       String?
   isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())  // <-- agrega este campo
+  createdAt   DateTime @default(now())
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
