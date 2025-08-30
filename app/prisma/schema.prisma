@@ -86,15 +86,16 @@ model EventRoute {
 }
 
 model Dog {
-  id       String  @id @default(cuid())
-  userId   String
-  name     String
-  breed    String?
-  sex      String?
-  age      Int?
-  photo    String?
-  isActive Boolean @default(true)
-  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  breed       String?
+  sex         String?
+  age         Int?
+  photo       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())  // <-- agrega este campo
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model EventParticipant {
