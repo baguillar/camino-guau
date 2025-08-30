@@ -52,6 +52,7 @@ model User {
   eventParticipations EventParticipant[]
   achievements        UserAchievement[]
   walks               Walk[]
+  dogs                Dog[]
 
   @@map("users")
 }
@@ -82,6 +83,18 @@ model EventRoute {
   walks                Walk[]
 
   @@map("event_routes")
+}
+
+model Dog {
+  id       String  @id @default(cuid())
+  userId   String
+  name     String
+  breed    String?
+  sex      String?
+  age      Int?
+  photo    String?
+  isActive Boolean @default(true)
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model EventParticipant {
