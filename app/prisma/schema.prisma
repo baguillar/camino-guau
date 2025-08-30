@@ -92,16 +92,20 @@ enum DogSex {
 }
 
 model Dog {
-  id          String   @id @default(cuid())
-  userId      String
-  name        String
-  breed       String?
-  sex         DogSex?
-  age         Int?
-  photo       String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                    String   @id @default(cuid())
+  userId                String
+  name                  String
+  breed                 String?
+  sex                   DogSex?
+  age                   Int?
+  photo                 String?
+  obedience             Int?     // agrega este campo
+  socializationWithDogs Int?     // agrega este campo
+  socializationWithPeople Int?   // agrega este campo
+  specialCharacteristic String?  // agrega este campo
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model EventParticipant {
