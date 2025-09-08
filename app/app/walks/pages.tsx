@@ -15,7 +15,7 @@ import { es } from 'date-fns/locale'
 export default async function WalksPage() {
   const session = await getServerSession(authOptions)
   
-  if (!session) {
+  if (!session || !session.user?.id) {
     redirect('/auth/login')
   }
 
