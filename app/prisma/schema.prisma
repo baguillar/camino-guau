@@ -1,12 +1,10 @@
 generator client {
-    provider = "prisma-client-js"
-    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
-    output = "/home/ubuntu/camino_guau_revision/app/node_modules/.prisma/client"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Account {
@@ -94,20 +92,20 @@ enum DogSex {
 }
 
 model Dog {
-  id                      String   @id @default(cuid())
-  userId                  String
-  name                    String
-  breed                   String?
-  sex                     DogSex?
-  age                     Int?
-  photo                   String?
-  obedience               Int?     // 1-10 scale
-  socializationWithDogs   Int?     // 1-10 scale  
-  socializationWithPeople Int?     // 1-10 scale
-  specialCharacteristic   String?
-  isActive                Boolean  @default(true)
-  createdAt               DateTime @default(now())
-  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                    String   @id @default(cuid())
+  userId                String
+  name                  String
+  breed                 String?
+  sex                   DogSex?
+  age                   Int?
+  photo                 String?
+  obedience             Int?     // agrega este campo
+  socializationWithDogs Int?     // agrega este campo
+  socializationWithPeople Int?   // agrega este campo
+  specialCharacteristic String?  // agrega este campo
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model EventParticipant {
