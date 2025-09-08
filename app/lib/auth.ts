@@ -16,49 +16,55 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null
+          throw new Error('Email y contraseña son requeridos')
         }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email
+        try {
+          const user = await prisma.user.findUnique({
+            where: {
+              email: credentials.email
+            }
+          })
+
+          if (!user) {
+            throw new Error('Usuario no encontrado')
           }
-        })
 
-        if (!user) {
-          return null
-        }
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password
+          )
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        )
+          if (!isPasswordValid) {
+            throw new Error('Contraseña incorrecta')
+          }
 
-        if (!isPasswordValid) {
-          return null
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          }
+        } catch (error) {
+          console.error('Auth error:', error)
+          throw error
         }
       }
     })
   ],
   session: {
-    strategy: "jwt"
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
+    async jwt({ token, user, trigger }) {
+      if (trigger === "signIn" && user) {
         token.role = user.role
       }
       return token
     },
     async session({ session, token }) {
-      if (token) {
+      if (token && session.user) {
         session.user.id = token.sub || ''
         session.user.role = token.role || 'USER'
       }
@@ -67,7 +73,33 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/auth/login',
-  }
+    error: '/auth/login', // Redirect errors back to login
+  },
+  events: {
+    async signIn({ user, isNewUser }) {
+      if (isNewUser && user.id) {
+        // Auto-grant welcome achievement for new users
+        try {
+          const welcomeAchievement = await prisma.achievement.findUnique({
+            where: { name: 'Bienvenida' }
+          })
+
+          if (welcomeAchievement) {
+            await prisma.userAchievement.create({
+              data: {
+                userId: user.id,
+                achievementId: welcomeAchievement.id,
+                progress: 100
+              }
+            })
+          }
+        } catch (error) {
+          console.error('Error granting welcome achievement:', error)
+        }
+      }
+    }
+  },
+  debug: process.env.NODE_ENV === 'development',
 }
 
 export function isAdmin(userRole: string | undefined): boolean {
