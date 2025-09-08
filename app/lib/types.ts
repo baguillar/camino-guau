@@ -93,3 +93,27 @@ export interface User {
   lastWalkDate?: Date | null
   joinedDate: Date
 }
+
+// Admin stats types
+export interface MonthlyWalkData {
+  month: string
+  walks: number
+  totalKm: number
+  avgDuration: number
+}
+
+export interface MonthlyUserData {
+  month: string
+  newUsers: number
+  activeUsers: number
+  totalUsers: number
+}
+
+export interface DashboardStats {
+  totalUsers: number
+  totalWalks: number
+  totalKilometers: number
+  totalAchievements: number
+  monthlyWalks: MonthlyWalkData[]
+  monthlyUsers: MonthlyUserData[]
+}
