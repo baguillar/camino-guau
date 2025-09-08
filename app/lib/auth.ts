@@ -5,9 +5,9 @@ import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/db"
 
 export const authOptions: NextAuthOptions = {
-  // No usar adapter con CredentialsProvider
   providers: [
     CredentialsProvider({
+      id: "credentials",
       name: "credentials",
       credentials: {
         email: { label: "Email", type: "email" },
@@ -15,7 +15,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error('Email y contraseña son requeridos')
+          return null
         }
 
         try {
@@ -26,7 +26,7 @@ export const authOptions: NextAuthOptions = {
           })
 
           if (!user) {
-            throw new Error('Usuario no encontrado')
+            return null
           }
 
           const isPasswordValid = await bcrypt.compare(
@@ -35,7 +35,7 @@ export const authOptions: NextAuthOptions = {
           )
 
           if (!isPasswordValid) {
-            throw new Error('Contraseña incorrecta')
+            return null
           }
 
           return {
@@ -46,59 +46,34 @@ export const authOptions: NextAuthOptions = {
           }
         } catch (error) {
           console.error('Auth error:', error)
-          throw error
+          return null
         }
       }
     })
   ],
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async jwt({ token, user, trigger }) {
-      if (trigger === "signIn" && user) {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id
         token.role = user.role
       }
       return token
     },
     async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = token.sub || ''
-        session.user.role = token.role || 'USER'
+      if (token) {
+        session.user.id = token.id as string
+        session.user.role = token.role as string
       }
       return session
     }
   },
   pages: {
     signIn: '/auth/login',
-    error: '/auth/login', // Redirect errors back to login
   },
-  events: {
-    async signIn({ user, isNewUser }) {
-      if (isNewUser && user.id) {
-        // Auto-grant welcome achievement for new users
-        try {
-          const welcomeAchievement = await prisma.achievement.findUnique({
-            where: { name: 'Bienvenida' }
-          })
-
-          if (welcomeAchievement) {
-            await prisma.userAchievement.create({
-              data: {
-                userId: user.id,
-                achievementId: welcomeAchievement.id,
-                progress: 100
-              }
-            })
-          }
-        } catch (error) {
-          console.error('Error granting welcome achievement:', error)
-        }
-      }
-    }
-  },
-  debug: process.env.NODE_ENV === 'development',
+  secret: process.env.NEXTAUTH_SECRET,
 }
 
 export function isAdmin(userRole: string | undefined): boolean {
