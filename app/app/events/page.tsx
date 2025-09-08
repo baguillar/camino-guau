@@ -1,320 +1,187 @@
 
-'use client'
-
-import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
-import { motion } from 'framer-motion'
-import { 
-  CalendarDays, 
-  MapPin, 
-  Users, 
-  Clock, 
-  Euro,
-  Star,
-  CheckCircle,
-  XCircle,
-  Route
-} from 'lucide-react'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { prisma } from '@/lib/db'
+import { Navigation } from '@/components/dashboard/navigation'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { toast } from 'sonner'
+import { Calendar, MapPin, Users, Route, Clock, Euro } from 'lucide-react'
+import Link from 'next/link'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
-interface EventRoute {
-  id: string
-  name: string
-  description: string | null
-  location: string
-  distance: number
-  difficulty: string
-  eventDate: string
-  maxParticipants: number | null
-  entryPrice: number | null
-  requiresConfirmation: boolean
-  isActive: boolean
-  _count: {
-    eventParticipants: number
+export default async function EventsPage() {
+  const session = await getServerSession(authOptions)
+  
+  if (!session) {
+    redirect('/auth/login')
   }
-  userParticipation?: {
-    id: string
-    attendanceConfirmed: boolean
-    confirmationCode: string
-    registeredAt: string
-  } | null
-}
 
-export default function EventsPage() {
-  const { data: session } = useSession()
-  const [events, setEvents] = useState<EventRoute[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetchEvents()
-  }, [])
-
-  const fetchEvents = async () => {
-    try {
-      const response = await fetch('/api/events')
-      if (response.ok) {
-        const data = await response.json()
-        setEvents(data)
+  const events = await prisma.eventRoute.findMany({
+    where: { 
+      isActive: true,
+      eventDate: {
+        gte: new Date() // Solo eventos futuros
       }
-    } catch (error) {
-      console.error('Error fetching events:', error)
-      toast.error('Error al cargar los eventos')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const registerForEvent = async (eventId: string) => {
-    if (!session?.user) {
-      toast.error('Debes estar logueado para registrarte')
-      return
-    }
-
-    try {
-      const response = await fetch('/api/events/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ eventRouteId: eventId }),
-      })
-
-      if (response.ok) {
-        toast.success('¡Te has registrado exitosamente!')
-        fetchEvents() // Refresh to show updated status
-      } else {
-        const error = await response.json()
-        toast.error(error.message || 'Error al registrarse')
+    },
+    orderBy: { eventDate: 'asc' },
+    include: {
+      eventParticipants: {
+        where: { userId: session.user.id }
+      },
+      _count: {
+        select: { eventParticipants: true }
       }
-    } catch (error) {
-      console.error('Error registering for event:', error)
-      toast.error('Error al registrarse')
     }
-  }
+  })
 
   const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty.toLowerCase()) {
-      case 'easy': return 'bg-green-100 text-green-800'
-      case 'medium': return 'bg-yellow-100 text-yellow-800'
-      case 'hard': return 'bg-red-100 text-red-800'
+    switch (difficulty) {
+      case 'EASY': return 'bg-green-100 text-green-800'
+      case 'MEDIUM': return 'bg-yellow-100 text-yellow-800'
+      case 'HARD': return 'bg-red-100 text-red-800'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
 
   const getDifficultyText = (difficulty: string) => {
-    switch (difficulty.toLowerCase()) {
-      case 'easy': return 'Fácil'
-      case 'medium': return 'Medio'
-      case 'hard': return 'Difícil'
-      default: return difficulty
+    switch (difficulty) {
+      case 'EASY': return 'Fácil'
+      case 'MEDIUM': return 'Intermedio'
+      case 'HARD': return 'Difícil'
+      default: return 'Sin especificar'
     }
-  }
-
-  const getEventStatus = (event: EventRoute) => {
-    const eventDate = new Date(event.eventDate)
-    const now = new Date()
-    const participation = event.userParticipation
-
-    if (eventDate < now) {
-      if (participation?.attendanceConfirmed) {
-        return { status: 'completed', text: 'Completado', color: 'bg-green-100 text-green-800' }
-      } else if (participation && !participation.attendanceConfirmed) {
-        return { status: 'missed', text: 'No Confirmado', color: 'bg-red-100 text-red-800' }
-      } else {
-        return { status: 'past', text: 'Finalizado', color: 'bg-gray-100 text-gray-800' }
-      }
-    }
-
-    if (participation) {
-      return { status: 'registered', text: 'Registrado', color: 'bg-blue-100 text-blue-800' }
-    }
-
-    if (event.maxParticipants && event._count.eventParticipants >= event.maxParticipants) {
-      return { status: 'full', text: 'Completo', color: 'bg-red-100 text-red-800' }
-    }
-
-    return { status: 'available', text: 'Disponible', color: 'bg-green-100 text-green-800' }
-  }
-
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-        </div>
-      </div>
-    )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-100">
-      <div className="container mx-auto px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Eventos <span className="text-blue-600">Guau</span>
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Únete a nuestros eventos exclusivos y vive aventuras increíbles con tu compañero canino
-            </p>
-          </div>
+    <div className="min-h-screen bg-gray-50">
+      <Navigation />
+      
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">
+            Eventos Guau
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Únete a caminatas grupales y conoce otros amantes de los perros
+          </p>
+        </div>
 
-          {events.length === 0 ? (
-            <Card className="text-center p-8 bg-white/80 backdrop-blur-sm">
-              <CardContent>
-                <CalendarDays className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  No hay eventos disponibles
-                </h3>
-                <p className="text-gray-600">
-                  ¡Mantente atento! Pronto habrá nuevos eventos emocionantes.
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {events.map((event, index) => {
-                const eventStatus = getEventStatus(event)
-                const eventDate = new Date(event.eventDate)
-                const isUpcoming = eventDate > new Date()
-                
-                return (
-                  <motion.div
-                    key={event.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                  >
-                    <Card className="h-full bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-                      <CardHeader className="pb-4">
-                        <div className="flex justify-between items-start mb-3">
-                          <CardTitle className="text-xl font-bold text-gray-900 line-clamp-2">
-                            {event.name}
-                          </CardTitle>
-                          <Badge className={eventStatus.color}>
-                            {eventStatus.text}
+        {events.length > 0 ? (
+          <div className="grid gap-6">
+            {events.map((event) => {
+              const isRegistered = event.eventParticipants.length > 0
+              const isFull = event.maxParticipants ? event._count.eventParticipants >= event.maxParticipants : false
+              
+              return (
+                <Card key={event.id} className="shadow-lg hover:shadow-xl transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="grid md:grid-cols-3 gap-6">
+                      {/* Event Info */}
+                      <div className="md:col-span-2">
+                        <div className="flex items-start justify-between mb-4">
+                          <div>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                              {event.name}
+                            </h3>
+                            <p className="text-gray-600 mb-4">
+                              {event.description}
+                            </p>
+                          </div>
+                          <Badge className={getDifficultyColor(event.difficulty)}>
+                            {getDifficultyText(event.difficulty)}
                           </Badge>
                         </div>
-                        
-                        <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                          <CalendarDays className="w-4 h-4" />
-                          <span>{format(eventDate, 'PPP', { locale: es })}</span>
-                        </div>
-                        
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Clock className="w-4 h-4" />
-                          <span>{format(eventDate, 'HH:mm')}h</span>
-                        </div>
-                      </CardHeader>
-                      
-                      <CardContent className="pt-0">
-                        {event.description && (
-                          <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                            {event.description}
-                          </p>
-                        )}
-                        
-                        <div className="space-y-3 mb-4">
-                          <div className="flex items-center gap-2 text-sm">
-                            <MapPin className="w-4 h-4 text-blue-600" />
-                            <span className="text-gray-700">{event.location}</span>
+
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div className="flex items-center text-gray-600">
+                            <Calendar className="h-4 w-4 mr-2" />
+                            {format(new Date(event.eventDate), "d 'de' MMMM, yyyy", { locale: es })}
                           </div>
-                          
-                          <div className="flex items-center gap-2 text-sm">
-                            <Route className="w-4 h-4 text-blue-600" />
-                            <span className="text-gray-700">{event.distance} km</span>
+                          <div className="flex items-center text-gray-600">
+                            <Clock className="h-4 w-4 mr-2" />
+                            {format(new Date(event.eventDate), "HH:mm", { locale: es })}
                           </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <Badge className={getDifficultyColor(event.difficulty)}>
-                              {getDifficultyText(event.difficulty)}
-                            </Badge>
+                          <div className="flex items-center text-gray-600">
+                            <MapPin className="h-4 w-4 mr-2" />
+                            {event.location}
                           </div>
-                          
-                          <div className="flex items-center justify-between text-sm">
-                            <div className="flex items-center gap-2">
-                              <Users className="w-4 h-4 text-blue-600" />
-                              <span className="text-gray-700">
-                                {event._count.eventParticipants}
-                                {event.maxParticipants ? ` / ${event.maxParticipants}` : ''}
-                              </span>
+                          <div className="flex items-center text-gray-600">
+                            <Route className="h-4 w-4 mr-2" />
+                            {event.distance} km
+                          </div>
+                          <div className="flex items-center text-gray-600">
+                            <Users className="h-4 w-4 mr-2" />
+                            {event._count.eventParticipants}
+                            {event.maxParticipants ? ` / ${event.maxParticipants}` : ''} participantes
+                          </div>
+                          {event.entryPrice && event.entryPrice > 0 && (
+                            <div className="flex items-center text-gray-600">
+                              <Euro className="h-4 w-4 mr-2" />
+                              {event.entryPrice.toFixed(2)}€
                             </div>
-                            
-                            {event.entryPrice && (
-                              <div className="flex items-center gap-1 font-semibold text-blue-600">
-                                <Euro className="w-4 h-4" />
-                                <span>{event.entryPrice}</span>
-                              </div>
-                            )}
-                          </div>
+                          )}
                         </div>
+                      </div>
 
-                        {/* Event Status Actions */}
-                        {isUpcoming && (
-                          <div className="mt-4">
-                            {!event.userParticipation ? (
-                              eventStatus.status === 'full' ? (
-                                <Button disabled className="w-full">
-                                  <XCircle className="w-4 h-4 mr-2" />
-                                  Evento Completo
-                                </Button>
-                              ) : (
-                                <Button 
-                                  onClick={() => registerForEvent(event.id)}
-                                  className="w-full bg-blue-600 hover:bg-blue-700"
-                                >
-                                  Registrarse al Evento
-                                </Button>
-                              )
-                            ) : (
-                              <div className="text-center">
-                                <div className="flex items-center justify-center gap-2 text-green-600 mb-2">
-                                  <CheckCircle className="w-5 h-5" />
-                                  <span className="font-medium">¡Registrado!</span>
-                                </div>
-                                <p className="text-sm text-gray-600">
-                                  Código: <code className="bg-gray-100 px-2 py-1 rounded">
-                                    {event.userParticipation.confirmationCode}
-                                  </code>
-                                </p>
-                              </div>
-                            )}
+                      {/* Action Button */}
+                      <div className="flex flex-col justify-center">
+                        {isRegistered ? (
+                          <div className="text-center">
+                            <Badge className="bg-green-100 text-green-800 mb-4">
+                              ¡Ya estás registrado!
+                            </Badge>
+                            <Link href={`/events/${event.id}`}>
+                              <Button variant="outline" className="w-full">
+                                Ver detalles
+                              </Button>
+                            </Link>
+                          </div>
+                        ) : isFull ? (
+                          <div className="text-center">
+                            <Badge className="bg-red-100 text-red-800 mb-4">
+                              Evento completo
+                            </Badge>
+                            <Link href={`/events/${event.id}`}>
+                              <Button variant="outline" className="w-full">
+                                Ver detalles
+                              </Button>
+                            </Link>
+                          </div>
+                        ) : (
+                          <div className="text-center">
+                            <Link href={`/events/${event.id}`}>
+                              <Button className="w-full mb-2">
+                                Registrarse
+                              </Button>
+                            </Link>
+                            <p className="text-xs text-gray-500">
+                              {event.requiresConfirmation ? 'Requiere confirmación' : 'Registro directo'}
+                            </p>
                           </div>
                         )}
-
-                        {/* Past event status */}
-                        {!isUpcoming && event.userParticipation && (
-                          <div className="mt-4 p-3 rounded-lg bg-gray-50">
-                            {event.userParticipation.attendanceConfirmed ? (
-                              <div className="flex items-center gap-2 text-green-600">
-                                <CheckCircle className="w-5 h-5" />
-                                <span className="font-medium">Asistencia Confirmada</span>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2 text-amber-600">
-                                <Clock className="w-5 h-5" />
-                                <span className="text-sm">Asistencia pendiente de confirmación</span>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                )
-              })}
-            </div>
-          )}
-        </motion.div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        ) : (
+          <Card>
+            <CardContent className="text-center py-12">
+              <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                No hay eventos próximos
+              </h3>
+              <p className="text-gray-600 mb-4">
+                No hay eventos Guau programados en este momento. ¡Mantente atento para nuevas aventuras!
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   )
