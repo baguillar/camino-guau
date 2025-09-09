@@ -1,6 +1,23 @@
 {
-  "version": 2,
-  "buildCommand": "cd app && npm run build",
-  "installCommand": "cd app && npm install",
-  "outputDirectory": ".next"
+  "env": {
+    "NEXTAUTH_URL": "https://camino-guau-k4ej2ql9m-eventosguaus-projects.vercel.app",
+    "NEXTAUTH_SECRET": "K8mN2pQ5rT9wX3zA6bC1dF4gH7jL0mP3sV8yB5eR2uI9oK6nM1qT4wX7zA0bC3dF"
+  },
+  "build": {
+    "env": {
+      "NEXTAUTH_URL": "https://camino-guau-k4ej2ql9m-eventosguaus-projects.vercel.app",
+      "NEXTAUTH_SECRET": "K8mN2pQ5rT9wX3zA6bC1dF4gH7jL0mP3sV8yB5eR2uI9oK6nM1qT4wX7zA0bC3dF"
+    }
+  },
+  "functions": {
+    "app/api/auth/[...nextauth]/route.ts": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/auth/(.*)",
+      "destination": "/api/auth/$1"
+    }
+  ]
 }
