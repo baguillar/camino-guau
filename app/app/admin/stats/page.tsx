@@ -78,27 +78,58 @@ async function getStatsData() {
     month: Date
     walks: bigint
     kilometers: number
+    avgDuration: number
   }>>`
     SELECT 
       DATE_TRUNC('month', date) as month,
       COUNT(*) as walks,
-      SUM(kilometers) as kilometers
+      SUM(kilometers) as kilometers,
+      AVG(COALESCE(duration, 0)) as avgDuration
     FROM walks 
     WHERE date >= ${lastYear}
     GROUP BY DATE_TRUNC('month', date)
     ORDER BY month
   `
 
+  // Get monthly user data with all required fields
   const monthlyUsersRaw = await prisma.$queryRaw<Array<{
     month: Date
-    users: bigint
+    newUsers: bigint
+    activeUsers: bigint
+    totalUsers: bigint
   }>>`
+    WITH monthly_new_users AS (
+      SELECT 
+        DATE_TRUNC('month', "joinedDate") as month,
+        COUNT(*) as newUsers
+      FROM users 
+      WHERE "joinedDate" >= ${lastYear}
+      GROUP BY DATE_TRUNC('month', "joinedDate")
+    ),
+    monthly_active_users AS (
+      SELECT 
+        DATE_TRUNC('month', "lastWalkDate") as month,
+        COUNT(DISTINCT id) as activeUsers
+      FROM users 
+      WHERE "lastWalkDate" >= ${lastYear}
+      GROUP BY DATE_TRUNC('month', "lastWalkDate")
+    ),
+    monthly_total_users AS (
+      SELECT 
+        DATE_TRUNC('month', "joinedDate") as month,
+        COUNT(*) OVER (ORDER BY DATE_TRUNC('month', "joinedDate") ROWS UNBOUNDED PRECEDING) as totalUsers
+      FROM users 
+      WHERE "joinedDate" >= ${lastYear}
+      GROUP BY DATE_TRUNC('month', "joinedDate")
+    )
     SELECT 
-      DATE_TRUNC('month', "joinedDate") as month,
-      COUNT(*) as users
-    FROM users 
-    WHERE "joinedDate" >= ${lastYear}
-    GROUP BY DATE_TRUNC('month', "joinedDate")
+      COALESCE(mnu.month, mau.month, mtu.month) as month,
+      COALESCE(mnu.newUsers, 0) as newUsers,
+      COALESCE(mau.activeUsers, 0) as activeUsers,
+      COALESCE(mtu.totalUsers, 0) as totalUsers
+    FROM monthly_new_users mnu
+    FULL OUTER JOIN monthly_active_users mau ON mnu.month = mau.month
+    FULL OUTER JOIN monthly_total_users mtu ON COALESCE(mnu.month, mau.month) = mtu.month
     ORDER BY month
   `
 
@@ -107,18 +138,24 @@ async function getStatsData() {
     month: Date
     walks: bigint
     kilometers: number
+    avgDuration: number
   }) => ({
-    month: item.month,
+    month: item.month.toISOString().slice(0, 7), // Convert Date to YYYY-MM string
     walks: Number(item.walks),
-    kilometers: Number(item.kilometers)
+    totalKm: Number(item.kilometers), // Map kilometers to totalKm
+    avgDuration: Number(item.avgDuration)
   }))
 
   const monthlyUsers: MonthlyUserData[] = monthlyUsersRaw.map((item: {
     month: Date
-    users: bigint
+    newUsers: bigint
+    activeUsers: bigint
+    totalUsers: bigint
   }) => ({
-    month: item.month,
-    users: Number(item.users)
+    month: item.month.toISOString().slice(0, 7), // Convert Date to YYYY-MM string
+    newUsers: Number(item.newUsers),
+    activeUsers: Number(item.activeUsers),
+    totalUsers: Number(item.totalUsers)
   }))
 
   // Achievement stats
@@ -155,6 +192,13 @@ async function getStatsData() {
   })
 
   return {
+    totalUsers,
+    totalWalks,
+    totalKilometers: totalKilometers._sum.kilometers || 0,
+    totalAchievements,
+    monthlyWalks,
+    monthlyUsers,
+    // Additional data for extended functionality
     basicStats: {
       totalUsers,
       totalWalks,
@@ -173,10 +217,6 @@ async function getStatsData() {
     topUsers: {
       byKilometers: topUsersByKm,
       byWalks: topUsersByWalks
-    },
-    chartData: {
-      monthlyWalks,
-      monthlyUsers
     },
     achievementStats,
     eventRouteStats
@@ -202,7 +242,7 @@ export default async function StatsPage() {
           </p>
         </div>
         
-        <StatsOverview data={data} />
+        <StatsOverview stats={data} />
       </div>
     </AdminLayout>
   )
