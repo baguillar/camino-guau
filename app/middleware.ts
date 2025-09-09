@@ -50,6 +50,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - public folder
      */
-    '/((?!api/auth|_next/static|_next/image|favicon.ico|public|images|icons|achievements).*)',
+    '/((?!api/auth|api/auth-test|api/test|_next/static|_next/image|favicon.ico|public|images|icons|achievements).*)',
   ],
 }

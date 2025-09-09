@@ -17,6 +17,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          console.log('Missing credentials')
           return null
         }
 
@@ -28,6 +29,7 @@ export const authOptions: NextAuthOptions = {
           })
 
           if (!user) {
+            console.log('User not found:', credentials.email)
             return null
           }
 
@@ -37,9 +39,11 @@ export const authOptions: NextAuthOptions = {
           )
 
           if (!isPasswordValid) {
+            console.log('Invalid password for user:', credentials.email)
             return null
           }
 
+          console.log('User authenticated successfully:', user.email)
           return {
             id: user.id,
             email: user.email,
@@ -80,6 +84,7 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',
+  trustHost: true,
 }
 
 export function isAdmin(userRole: string | undefined): boolean {
