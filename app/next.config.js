@@ -13,7 +13,14 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
-  images: { unoptimized: true },
+  images: { 
+    unoptimized: true,
+    domains: ['localhost', 'camino-guau-k4ej2ql9m-eventosguaus-projects.vercel.app', 'caminoguau.es']
+  },
+  env: {
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+  },
 };
 
 module.exports = nextConfig;
