@@ -1,49 +1,33 @@
-
 'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { CalendarDays, Users, MapPin, Clock, TrendingUp, Star } from 'lucide-react'
-
-interface StatsData {
-  totalUsers: number
-  totalWalks: number
-  totalDistance: number
-  averageRating: number
-  popularLocations: string[]
-  recentActivity: {
-    date: string
-    walks: number
-    newUsers: number
-  }[]
-}
+import { DashboardStats } from '@/lib/types'
 
 export default function AdminStatsPage() {
-  const [stats, setStats] = useState<StatsData | null>(null)
+  const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Simular carga de datos
     const fetchStats = async () => {
-      // Aquí iría la llamada real a la API
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      setStats({
-        totalUsers: 1247,
-        totalWalks: 3892,
-        totalDistance: 15678.5,
-        averageRating: 4.7,
-        popularLocations: ['Parque Central', 'Malecón', 'Plaza Mayor', 'Parque de los Perros'],
-        recentActivity: [
-          { date: '2024-01-15', walks: 45, newUsers: 8 },
-          { date: '2024-01-14', walks: 38, newUsers: 5 },
-          { date: '2024-01-13', walks: 52, newUsers: 12 },
-          { date: '2024-01-12', walks: 41, newUsers: 7 },
-          { date: '2024-01-11', walks: 35, newUsers: 4 },
-        ]
-      })
-      setLoading(false)
+      try {
+        setLoading(true)
+        const response = await fetch('/api/admin/stats')
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch stats')
+        }
+        
+        const data: DashboardStats = await response.json()
+        setStats(data)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred')
+      } finally {
+        setLoading(false)
+      }
     }
 
     fetchStats()
@@ -59,11 +43,13 @@ export default function AdminStatsPage() {
     )
   }
 
-  if (!stats) {
+  if (error || !stats) {
     return (
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center h-64">
-          <div className="text-lg text-red-500">Error al cargar las estadísticas</div>
+          <div className="text-lg text-red-500">
+            Error al cargar las estadísticas: {error || 'Datos no disponibles'}
+          </div>
         </div>
       </div>
     )
@@ -89,7 +75,7 @@ export default function AdminStatsPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalUsers.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
-              +12% desde el mes pasado
+              Usuarios registrados
             </p>
           </CardContent>
         </Card>
@@ -102,7 +88,7 @@ export default function AdminStatsPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalWalks.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
-              +8% desde el mes pasado
+              Paseos completados
             </p>
           </CardContent>
         </Card>
@@ -113,71 +99,91 @@ export default function AdminStatsPage() {
             <MapPin className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalDistance.toLocaleString()} km</div>
+            <div className="text-2xl font-bold">{stats.totalKilometers.toLocaleString()} km</div>
             <p className="text-xs text-muted-foreground">
-              +15% desde el mes pasado
+              Kilómetros recorridos
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Calificación Promedio</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Logros</CardTitle>
             <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.averageRating}/5</div>
+            <div className="text-2xl font-bold">{stats.totalAchievements}</div>
             <p className="text-xs text-muted-foreground">
-              +0.2 desde el mes pasado
+              Logros disponibles
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Ubicaciones populares */}
+      {/* Estadísticas mensuales de paseos */}
       <Card>
         <CardHeader>
-          <CardTitle>Ubicaciones Más Populares</CardTitle>
+          <CardTitle>Estadísticas Mensuales de Paseos</CardTitle>
           <CardDescription>
-            Los lugares favoritos para pasear con perros
+            Resumen de los últimos 12 meses
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {stats.popularLocations.map((location, index) => (
-              <Badge key={index} variant="outline">
-                <MapPin className="w-3 h-3 mr-1" />
-                {location}
-              </Badge>
+          <div className="space-y-4">
+            {stats.monthlyWalks.slice(0, 6).map((monthData, index) => (
+              <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-medium">{monthData.month}</span>
+                </div>
+                <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                  <div className="flex items-center space-x-1">
+                    <Clock className="h-3 w-3" />
+                    <span>{monthData.walks} paseos</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <MapPin className="h-3 w-3" />
+                    <span>{monthData.totalKm.toFixed(1)} km</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <TrendingUp className="h-3 w-3" />
+                    <span>{monthData.avgDuration.toFixed(0)} min promedio</span>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </CardContent>
       </Card>
 
-      {/* Actividad reciente */}
+      {/* Estadísticas mensuales de usuarios */}
       <Card>
         <CardHeader>
-          <CardTitle>Actividad Reciente</CardTitle>
+          <CardTitle>Estadísticas Mensuales de Usuarios</CardTitle>
           <CardDescription>
-            Resumen de los últimos 5 días
+            Crecimiento de usuarios por mes
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {stats.recentActivity.map((day, index) => (
+            {stats.monthlyUsers.slice(0, 6).map((monthData, index) => (
               <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                 <div className="flex items-center space-x-3">
                   <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">{day.date}</span>
+                  <span className="font-medium">{monthData.month}</span>
                 </div>
                 <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                   <div className="flex items-center space-x-1">
-                    <Clock className="h-3 w-3" />
-                    <span>{day.walks} paseos</span>
+                    <Users className="h-3 w-3" />
+                    <span>{monthData.newUsers} nuevos</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <Users className="h-3 w-3" />
-                    <span>{day.newUsers} nuevos usuarios</span>
+                    <TrendingUp className="h-3 w-3" />
+                    <span>{monthData.activeUsers} activos</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Star className="h-3 w-3" />
+                    <span>{monthData.totalUsers} total</span>
                   </div>
                 </div>
               </div>
