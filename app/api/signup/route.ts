@@ -1,117 +1,132 @@
-import { NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 
-// Simulación de base de datos en memoria (en producción usar una base de datos real)
-const users: Array<{
-  id: string;
-  email: string;
-  password: string;
-  name: string;
-  createdAt: Date;
-}> = [];
+import { NextRequest, NextResponse } from 'next/server'
 
-export async function POST(request: NextRequest) {
+interface SignupRequest {
+  email: string
+  password: string
+  name: string
+  phone?: string
+}
+
+interface SignupResponse {
+  success: boolean
+  message: string
+  user?: {
+    id: string
+    email: string
+    name: string
+  }
+}
+
+export async function POST(request: NextRequest): Promise<NextResponse<SignupResponse>> {
   try {
-    const body = await request.json();
-    const { email, password, name } = body;
-
+    const body: SignupRequest = await request.json()
+    
     // Validación básica
-    if (!email || !password || !name) {
+    if (!body.email || !body.password || !body.name) {
       return NextResponse.json(
-        { error: 'Email, contraseña y nombre son requeridos' },
+        {
+          success: false,
+          message: 'Email, contraseña y nombre son requeridos'
+        },
         { status: 400 }
-      );
+      )
     }
 
     // Validar formato de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(body.email)) {
       return NextResponse.json(
-        { error: 'Formato de email inválido' },
+        {
+          success: false,
+          message: 'Formato de email inválido'
+        },
         { status: 400 }
-      );
+      )
     }
 
     // Validar longitud de contraseña
-    if (password.length < 6) {
+    if (body.password.length < 6) {
       return NextResponse.json(
-        { error: 'La contraseña debe tener al menos 6 caracteres' },
+        {
+          success: false,
+          message: 'La contraseña debe tener al menos 6 caracteres'
+        },
         { status: 400 }
-      );
+      )
     }
 
-    // Verificar si el usuario ya existe
-    const existingUser = users.find(user => user.email === email);
-    if (existingUser) {
+    // Aquí iría la lógica real de registro
+    // Por ahora, simulamos el proceso
+    
+    // Simular verificación de email existente
+    // En una implementación real, consultarías la base de datos
+    const existingEmails = ['test@example.com', 'admin@camino-guau.com']
+    if (existingEmails.includes(body.email.toLowerCase())) {
       return NextResponse.json(
-        { error: 'El usuario ya existe con este email' },
+        {
+          success: false,
+          message: 'Este email ya está registrado'
+        },
         { status: 409 }
-      );
+      )
     }
 
-    // Hashear la contraseña
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    // Crear nuevo usuario
+    // Simular creación de usuario
     const newUser = {
-      id: Date.now().toString(),
-      email,
-      password: hashedPassword,
-      name,
-      createdAt: new Date()
-    };
+      id: `user_${Date.now()}`,
+      email: body.email.toLowerCase(),
+      name: body.name,
+      phone: body.phone || null,
+      createdAt: new Date().toISOString()
+    }
 
-    // Guardar usuario (en producción, guardar en base de datos)
-    users.push(newUser);
+    // En una implementación real:
+    // 1. Hashear la contraseña con bcrypt
+    // 2. Guardar el usuario en la base de datos
+    // 3. Enviar email de verificación
+    // 4. Crear sesión/token JWT
 
-    // Crear JWT token
-    const token = jwt.sign(
-      { 
-        userId: newUser.id, 
-        email: newUser.email,
-        name: newUser.name
-      },
-      process.env.JWT_SECRET || 'fallback-secret-key',
-      { expiresIn: '7d' }
-    );
-
-    // Respuesta exitosa (no incluir la contraseña)
-    const userResponse = {
+    console.log('Nuevo usuario registrado:', {
       id: newUser.id,
       email: newUser.email,
-      name: newUser.name,
-      createdAt: newUser.createdAt
-    };
+      name: newUser.name
+    })
 
     return NextResponse.json(
       {
+        success: true,
         message: 'Usuario registrado exitosamente',
-        user: userResponse,
-        token
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          name: newUser.name
+        }
       },
       { status: 201 }
-    );
+    )
 
   } catch (error) {
-    console.error('Error en signup:', error);
+    console.error('Error en registro:', error)
+    
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      {
+        success: false,
+        message: 'Error interno del servidor'
+      },
       { status: 500 }
-    );
+    )
   }
 }
 
 // Método GET para verificar que la ruta funciona
-export async function GET() {
+export async function GET(): Promise<NextResponse> {
   return NextResponse.json(
-    { 
-      message: 'API de registro funcionando',
-      endpoint: '/api/signup',
-      method: 'POST',
-      requiredFields: ['email', 'password', 'name']
+    {
+      message: 'API de registro activa',
+      methods: ['POST'],
+      endpoint: '/api/signup'
     },
     { status: 200 }
-  );
+  )
 }
