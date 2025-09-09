@@ -78,11 +78,13 @@ async function getStatsData() {
     month: Date
     walks: bigint
     kilometers: number
+    avgDuration: number
   }>>`
     SELECT 
       DATE_TRUNC('month', date) as month,
       COUNT(*) as walks,
-      SUM(kilometers) as kilometers
+      SUM(kilometers) as kilometers,
+      AVG(COALESCE(duration, 0)) as avgDuration
     FROM walks 
     WHERE date >= ${lastYear}
     GROUP BY DATE_TRUNC('month', date)
@@ -107,10 +109,12 @@ async function getStatsData() {
     month: Date
     walks: bigint
     kilometers: number
+    avgDuration: number
   }) => ({
-    month: item.month,
+    month: item.month.toISOString().slice(0, 7), // Convert Date to YYYY-MM string
     walks: Number(item.walks),
-    kilometers: Number(item.kilometers)
+    totalKm: Number(item.kilometers), // Map kilometers to totalKm
+    avgDuration: Number(item.avgDuration)
   }))
 
   const monthlyUsers: MonthlyUserData[] = monthlyUsersRaw.map((item: {
