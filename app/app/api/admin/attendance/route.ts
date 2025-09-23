@@ -80,7 +80,9 @@ async function checkAndUnlockAchievements(userId: string) {
     });
 
     const totalEvents = userParticipations.length;
-    const totalKilometers = userParticipations.reduce((acc, p) => acc + p.route.kilometers, 0);
+    const totalKilometers = userParticipations.reduce((acc: number, p) => {
+      return acc + (p.route?.kilometers || 0);
+    }, 0);
 
     // Get all achievements
     const allAchievements = await prisma.achievement.findMany();
