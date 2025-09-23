@@ -1,29 +1,36 @@
 
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { Providers } from '@/components/providers';
+import { Header } from '@/components/header';
+import { Toaster } from 'react-hot-toast';
 
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import { Providers } from '@/components/providers'
-import './globals.css'
-
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Camino Guau - App de Paseos para Perros',
-  description: 'La mejor aplicación para registrar y planificar paseos con tu perro',
-}
+  title: 'Camino Guau - Aventuras con tu perro',
+  description: 'La plataforma definitiva para compartir aventuras de senderismo con tu perro. Registra kilómetros, gana medallas y conecta con otros amantes de los perros.',
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
-    <html lang="es" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
+    <html lang="es">
+      <body className={inter.className}>
         <Providers>
-          {children}
+          <div className="min-h-screen bg-gradient-to-b from-brand-light to-white">
+            <Header />
+            <main className="pb-16">
+              {children}
+            </main>
+          </div>
+          <Toaster position="top-right" />
         </Providers>
       </body>
     </html>
-  )
+  );
 }

@@ -1,86 +1,79 @@
 
-import { NextAuthOptions } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
-import bcrypt from "bcryptjs"
-import { prisma } from "@/lib/db"
+import { NextAuthOptions } from 'next-auth';
+import { PrismaAdapter } from '@next-auth/prisma-adapter';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import bcrypt from 'bcryptjs';
+import { prisma } from './db';
 
 export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
-      id: "credentials",
-      name: "credentials",
+      name: 'credentials',
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null
+          return null;
         }
 
         try {
           const user = await prisma.user.findUnique({
-            where: {
-              email: credentials.email
-            }
-          })
+            where: { email: credentials.email },
+            include: { dog: true }
+          });
 
-          if (!user) {
-            return null
+          if (!user || !user.password) {
+            return null;
           }
 
           const isPasswordValid = await bcrypt.compare(
             credentials.password,
             user.password
-          )
+          );
 
           if (!isPasswordValid) {
-            return null
+            return null;
           }
 
           return {
             id: user.id,
             email: user.email,
             name: user.name,
-            role: user.role,
-          }
+            role: user.role as string,
+            profileImage: user.profileImage || null,
+          };
         } catch (error) {
-          console.error('Auth error:', error)
-          return null
+          console.error('Auth error:', error);
+          return null;
         }
-      }
-    })
+      },
+    }),
   ],
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
   },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.sub = user.id
-        token.id = user.id
-        token.role = user.role
+        token.role = user.role;
+        token.profileImage = user.profileImage;
       }
-      return token
+      return token;
     },
     async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = (token.sub || token.id) as string
-        session.user.role = token.role as string
+      if (token) {
+        session.user.id = token.sub || '';
+        session.user.role = token.role as string;
+        session.user.profileImage = token.profileImage as string | null;
       }
-      return session
-    }
+      return session;
+    },
   },
   pages: {
-    signIn: '/auth/login',
+    signIn: '/auth/signin',
   },
   secret: process.env.NEXTAUTH_SECRET,
-}
-
-export function isAdmin(userRole: string | undefined): boolean {
-  return userRole === 'ADMIN'
-}
-
-export function isUser(userRole: string | undefined): boolean {
-  return userRole === 'USER' || userRole === 'ADMIN'
-}
+};

@@ -1,31 +1,27 @@
 
+'use client';
 
-'use client'
-
-import { SessionProvider } from 'next-auth/react'
-import { ThemeProvider } from 'next-themes'
-import { Toaster } from 'sonner'
+import { SessionProvider } from 'next-auth/react';
+import { ReactNode, useEffect, useState } from 'react';
 
 interface ProvidersProps {
-  children: React.ReactNode
+  children: ReactNode;
 }
 
 export function Providers({ children }: ProvidersProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <SessionProvider>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="light"
-        enableSystem
-        disableTransitionOnChange
-      >
-        {children}
-        <Toaster 
-          position="top-right" 
-          expand={false}
-          richColors
-        />
-      </ThemeProvider>
+      {children}
     </SessionProvider>
-  )
+  );
 }

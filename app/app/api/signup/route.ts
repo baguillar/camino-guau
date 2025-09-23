@@ -1,63 +1,83 @@
 
-import { NextRequest, NextResponse } from 'next/server'
-import bcrypt from 'bcryptjs'
-import { prisma } from '@/lib/db'
-import { grantWelcomeAchievement } from '@/lib/achievements'
+import { NextRequest, NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import { prisma } from '@/lib/db';
 
-export async function POST(req: NextRequest) {
+export const dynamic = 'force-dynamic';
+
+export async function POST(request: NextRequest) {
   try {
-    const { name, email, password } = await req.json()
+    const body = await request.json();
+    const { 
+      email, 
+      password, 
+      name, 
+      dogName, 
+      dogAge, 
+      dogBreed, 
+      dogCharacterWithPeople, 
+      dogCharacterWithDogs, 
+      dogIsCastrated 
+    } = body;
 
-    if (!name || !email || !password) {
+    if (!email || !password || !name || !dogName) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Email, password, name, and dog name are required' },
         { status: 400 }
-      )
+      );
     }
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email }
-    })
+    });
 
     if (existingUser) {
       return NextResponse.json(
-        { error: 'User already exists' },
+        { error: 'User with this email already exists' },
         { status: 400 }
-      )
+      );
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12)
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        role: 'USER'
-      }
-    })
+    // Create user and dog in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          email,
+          password: hashedPassword,
+          name,
+          role: 'USER',
+        },
+      });
 
-    // Grant welcome achievement
-    const welcomeAchievement = await grantWelcomeAchievement(user.id)
+      const dog = await tx.dog.create({
+        data: {
+          userId: user.id,
+          name: dogName,
+          age: dogAge ? parseInt(dogAge) : null,
+          breed: dogBreed,
+          characterWithPeople: dogCharacterWithPeople,
+          characterWithDogs: dogCharacterWithDogs,
+          isCastrated: Boolean(dogIsCastrated),
+        },
+      });
+
+      return { user, dog };
+    });
 
     return NextResponse.json({
-      message: 'User created successfully',
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      },
-      welcomeAchievement
-    })
+      message: 'User and dog created successfully',
+      userId: result.user.id
+    });
+
   } catch (error) {
-    console.error('Signup error:', error)
+    console.error('Signup error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
-    )
+    );
   }
 }

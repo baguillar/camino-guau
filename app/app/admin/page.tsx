@@ -1,86 +1,106 @@
 
-import { redirect } from 'next/navigation'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { isAdmin } from '@/lib/auth'
-import { prisma } from '@/lib/db'
-import { AdminLayout } from '@/components/admin/admin-layout'
-import { AdminDashboard } from '@/components/admin/admin-dashboard'
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import { AdminClient } from './admin-client';
+import { prisma } from '@/lib/db';
 
-export const dynamic = "force-dynamic"
-
-async function getAdminData() {
-  const [users, walks, achievements, appConfig] = await Promise.all([
-    prisma.user.findMany({
-      orderBy: { joinedDate: 'desc' },
-      take: 10,
-      include: {
-        walks: { take: 1, orderBy: { date: 'desc' } },
-        achievements: { take: 3 },
-      },
-    }),
-    prisma.walk.findMany({
-      orderBy: { date: 'desc' },
-      take: 10,
-      include: { user: true },
-    }),
-    prisma.achievement.findMany({
-      orderBy: { sortOrder: 'asc' },
-      include: { users: { include: { user: true } } },
-    }),
-    prisma.appConfig.findMany(),
-  ])
-
-  // Calculate stats
-  const totalUsers = await prisma.user.count()
-  const totalWalks = await prisma.walk.count()
-  const totalKilometers = await prisma.walk.aggregate({
-    _sum: { kilometers: true },
-  })
-  const totalAchievements = await prisma.achievement.count()
-
-  const last30Days = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-  const recentUsers = await prisma.user.count({
-    where: { joinedDate: { gte: last30Days } },
-  })
-  const recentWalks = await prisma.walk.count({
-    where: { date: { gte: last30Days } },
-  })
-
-  return {
-    users,
-    walks,
-    achievements,
-    appConfig,
-    stats: {
-      totalUsers,
-      totalWalks,
-      totalKilometers: totalKilometers._sum.kilometers || 0,
-      totalAchievements,
-      recentUsers,
-      recentWalks,
-    },
-  }
-}
+export const dynamic = 'force-dynamic';
 
 export default async function AdminPage() {
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions);
 
-  if (!session?.user || !isAdmin(session.user.role)) {
-    redirect('/dashboard')
+  if (!session?.user?.id) {
+    redirect('/auth/signin');
   }
 
-  const data = await getAdminData()
+  // Check if user is admin
+  if (session.user.role !== 'ADMIN') {
+    redirect('/dashboard');
+  }
 
-  return (
-    <AdminLayout>
-      <AdminDashboard 
-        users={data.users}
-        walks={data.walks}
-        achievements={data.achievements}
-        appConfig={data.appConfig}
-        stats={data.stats}
+  try {
+    // Get upcoming routes
+    const routes = await prisma.route.findMany({
+      include: {
+        creator: {
+          select: {
+            name: true,
+          },
+        },
+        participations: {
+          include: {
+            user: {
+              include: {
+                dog: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            participations: true,
+          },
+        },
+      },
+      orderBy: {
+        date: 'desc',
+      },
+    });
+
+    // Get stats
+    const totalUsers = await prisma.user.count();
+    const totalRoutes = await prisma.route.count();
+    const totalParticipations = await prisma.participation.count();
+
+    // Transform routes data
+    const routesData = routes.map(route => ({
+      id: route.id,
+      title: route.title,
+      description: route.description,
+      kilometers: route.kilometers,
+      date: route.date.toISOString(),
+      maxParticipants: route.maxParticipants,
+      createdBy: route.creator.name,
+      participantsCount: route._count.participations,
+      createdAt: route.createdAt.toISOString(),
+      participants: route.participations.map(p => ({
+        id: p.id,
+        userId: p.userId,
+        userName: p.user.name,
+        userEmail: p.user.email,
+        dogName: p.user.dog?.name || null,
+        registeredAt: p.registeredAt.toISOString(),
+        attended: p.attended,
+        attendedAt: p.attendedAt?.toISOString() || null,
+      })),
+    }));
+
+    return (
+      <AdminClient
+        routes={routesData}
+        stats={{
+          totalUsers,
+          totalRoutes,
+          totalParticipations,
+          totalKilometers: 0,
+        }}
+        currentUserId={session.user.id}
       />
-    </AdminLayout>
-  )
+    );
+  } catch (error) {
+    console.error('Admin error:', error);
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-brand-light to-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-brand-dark mb-4">Error al cargar el panel de administración</h1>
+          <p className="text-gray-600">Inténtalo de nuevo más tarde.</p>
+        </div>
+      </div>
+    );
+  }
 }

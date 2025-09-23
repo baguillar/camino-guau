@@ -20,6 +20,13 @@ const config: Config = {
         sm: 'calc(var(--radius) - 4px)',
       },
       colors: {
+        // Camino Guau brand colors
+        'brand': {
+          'dark': '#343344',    // azul oscuro
+          'yellow': '#ffcc02',  // amarillo
+          'gold': '#C88726',    // marrón/dorado
+          'light': '#F1E6DD',   // beige claro
+        },
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -31,20 +38,20 @@ const config: Config = {
           foreground: 'hsl(var(--popover-foreground))',
         },
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
+          DEFAULT: '#343344', // Using brand dark as primary
+          foreground: '#ffffff',
         },
         secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
+          DEFAULT: '#F1E6DD', // Using brand light as secondary
+          foreground: '#343344',
         },
         muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
+          DEFAULT: '#F1E6DD',
+          foreground: '#343344',
         },
         accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
+          DEFAULT: '#ffcc02', // Using brand yellow as accent
+          foreground: '#343344',
         },
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
@@ -78,10 +85,20 @@ const config: Config = {
             height: '0',
           },
         },
+        'count-up': {
+          from: { opacity: '0', transform: 'translateY(10px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        'fade-in': {
+          from: { opacity: '0', transform: 'translateY(20px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'count-up': 'count-up 0.5s ease-out',
+        'fade-in': 'fade-in 0.6s ease-out',
       },
     },
   },
