@@ -42,7 +42,7 @@ export default async function DashboardPage() {
 
     // Calculate stats
     const totalEvents = user.participations.length;
-    const totalKilometers = user.participations.reduce((acc, p) => acc + p.route.kilometers, 0);
+    const totalKilometers = user.participations.reduce((acc: number, p: any) => acc + p.route.kilometers, 0);
     const totalAchievements = user.userAchievements.length;
 
     // Get recent participations (last 5)
@@ -75,7 +75,7 @@ export default async function DashboardPage() {
           totalKilometers,
           totalAchievements,
         }}
-        recentParticipations={recentParticipations.map(p => ({
+        recentParticipations={recentParticipations.map((p: any) => ({
           id: p.id,
           route: {
             title: p.route.title,
@@ -84,7 +84,7 @@ export default async function DashboardPage() {
           },
           attendedAt: p.attendedAt?.toISOString() || null,
         }))}
-        recentAchievements={recentAchievements.map(ua => ({
+        recentAchievements={recentAchievements.map((ua: any) => ({
           id: ua.id,
           achievement: {
             name: ua.achievement.name,

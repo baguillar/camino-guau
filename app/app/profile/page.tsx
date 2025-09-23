@@ -53,12 +53,12 @@ export default async function ProfilePage() {
 
     // Calculate stats
     const totalEvents = user.participations.length;
-    const totalKilometers = user.participations.reduce((acc, p) => acc + p.route.kilometers, 0);
-    const unlockedAchievements = user.userAchievements.map(ua => ua.achievementId);
+    const totalKilometers = user.participations.reduce((acc: number, p: any) => acc + p.route.kilometers, 0);
+    const unlockedAchievements = user.userAchievements.map((ua: any) => ua.achievementId);
 
     // Transform achievements to show locked/unlocked status
-    const achievementsWithStatus = allAchievements.map(achievement => {
-      const userAchievement = user.userAchievements.find(ua => ua.achievementId === achievement.id);
+    const achievementsWithStatus = allAchievements.map((achievement: any) => {
+      const userAchievement = user.userAchievements.find((ua: any) => ua.achievementId === achievement.id);
       return {
         id: achievement.id,
         name: achievement.name,
@@ -95,7 +95,7 @@ export default async function ProfilePage() {
           totalAchievements: unlockedAchievements.length,
         }}
         achievements={achievementsWithStatus}
-        recentParticipations={user.participations.slice(0, 10).map(p => ({
+        recentParticipations={user.participations.slice(0, 10).map((p: any) => ({
           id: p.id,
           route: {
             title: p.route.title,

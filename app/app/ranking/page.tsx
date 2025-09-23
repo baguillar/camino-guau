@@ -43,8 +43,8 @@ export default async function RankingPage() {
     });
 
     // Calculate stats and create ranking
-    const usersWithStats = users.map(user => {
-      const totalKilometers = user.participations.reduce((acc, p) => acc + p.route.kilometers, 0);
+    const usersWithStats = users.map((user: any) => {
+      const totalKilometers = user.participations.reduce((acc: number, p: any) => acc + p.route.kilometers, 0);
       const totalEvents = user.participations.length;
       const totalAchievements = user.userAchievements.length;
 
@@ -63,11 +63,11 @@ export default async function RankingPage() {
         },
       };
     })
-    .filter(user => user.stats.totalKilometers > 0) // Only show users with activity
-    .sort((a, b) => b.stats.totalKilometers - a.stats.totalKilometers); // Sort by kilometers desc
+    .filter((user: any) => user.stats.totalKilometers > 0) // Only show users with activity
+    .sort((a: any, b: any) => b.stats.totalKilometers - a.stats.totalKilometers); // Sort by kilometers desc
 
     // Add ranking positions
-    const ranking = usersWithStats.map((user, index) => ({
+    const ranking = usersWithStats.map((user: any, index: number) => ({
       ...user,
       position: index + 1,
       isCurrentUser: user.id === session.user.id,

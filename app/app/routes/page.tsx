@@ -50,7 +50,7 @@ export default async function RoutesPage() {
     });
 
     // Transform data for client
-    const routesData = routes.map(route => {
+    const routesData = routes.map((route: any) => {
       const averageRating = route.reviews?.length > 0 
         ? route.reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / route.reviews.length 
         : 0;

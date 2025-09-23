@@ -58,7 +58,7 @@ export default async function AdminPage() {
     const totalParticipations = await prisma.participation.count();
 
     // Transform routes data
-    const routesData = routes.map(route => ({
+    const routesData = routes.map((route: any) => ({
       id: route.id,
       title: route.title,
       description: route.description,
@@ -68,7 +68,7 @@ export default async function AdminPage() {
       createdBy: route.creator.name,
       participantsCount: route._count.participations,
       createdAt: route.createdAt.toISOString(),
-      participants: route.participations.map(p => ({
+      participants: route.participations.map((p: any) => ({
         id: p.id,
         userId: p.userId,
         userName: p.user.name,
