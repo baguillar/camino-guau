@@ -80,7 +80,7 @@ async function checkAndUnlockAchievements(userId: string) {
     });
 
     const totalEvents = userParticipations.length;
-    const totalKilometers = userParticipations.reduce((acc: number, p) => {
+    const totalKilometers = userParticipations.reduce((acc: number, p: { route?: { kilometers: number } | null }) => {
       return acc + (p.route?.kilometers || 0);
     }, 0);
 
