@@ -1,0 +1,12 @@
+{
+  "buildCommand": "cd app && npm ci && npx prisma generate && npm run build",
+  "outputDirectory": "app/.next",
+  "installCommand": "cd app && npm ci",
+  "devCommand": "cd app && npm run dev",
+  "framework": "nextjs",
+  "functions": {
+    "app/app/api/**/*.ts": {
+      "runtime": "nodejs18.x"
+    }
+  }
+}
