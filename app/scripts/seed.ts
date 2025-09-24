@@ -1,6 +1,14 @@
 
 
-import { PrismaClient, AchievementType } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+
+// Define AchievementType as const to avoid import issues during build
+const AchievementType = {
+  EVENTS_TOTAL: 'EVENTS_TOTAL',
+  KILOMETERS_TOTAL: 'KILOMETERS_TOTAL', 
+  EVENTS_CONSECUTIVE: 'EVENTS_CONSECUTIVE',
+  MONTHLY_COMPLETE: 'MONTHLY_COMPLETE'
+} as const;
 import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
