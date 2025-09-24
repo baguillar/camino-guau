@@ -1,0 +1,18 @@
+{
+  "buildCommand": "cd app && npm run build",
+  "outputDirectory": "app/.next",
+  "installCommand": "cd app && npm ci",
+  "devCommand": "cd app && npm run dev",
+  "framework": "nextjs",
+  "functions": {
+    "api/**/*.ts": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "ignores": [
+    {
+      "source": "app/.next/routes-manifest.json",
+      "destination": "/dev/null"
+    }
+  ]
+}
