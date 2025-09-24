@@ -80,7 +80,7 @@ async function checkAndUnlockAchievements(userId: string) {
     });
 
     const totalEvents = userParticipations.length;
-    const totalKilometers = userParticipations.reduce((acc: number, p) => {
+    const totalKilometers = userParticipations.reduce((acc: number, p: any) => {
       return acc + (p.route?.kilometers || 0);
     }, 0);
 
@@ -93,7 +93,7 @@ async function checkAndUnlockAchievements(userId: string) {
       select: { achievementId: true },
     });
 
-    const unlockedAchievementIds = new Set(userAchievements.map(ua => ua.achievementId));
+    const unlockedAchievementIds = new Set(userAchievements.map((ua: any) => ua.achievementId));
 
     // Check each achievement
     for (const achievement of allAchievements) {
